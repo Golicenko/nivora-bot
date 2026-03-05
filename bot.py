@@ -72,10 +72,14 @@ class AskState(StatesGroup):
 
 POPULAR = [
 "📥 Как скачать Game Guardian",
-"⚙️ Как установить Game Guardian",
+"⚙️ Как установить Game Guardian (Android 5-14)",
 "📦 Как скачать виртуальное пространство",
 "🛠 Как настроить Game Guardian",
-"📘 Как пользоваться Game Guardian"
+"📘 Как пользоваться Game Guardian",
+"📱 Что делать если Android 15-16",
+"📜 Как скачать скрипт",
+"📂 Как установить скрипт",
+"🎮 Как пользоваться скриптом"
 ]
 
 SERVICES = [
@@ -95,9 +99,9 @@ SERVICES = [
 
 def main_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🆓 Бесплатный пробный вопрос", callback_data="free_question")],
         [InlineKeyboardButton(text="🤩 Популярные вопросы", callback_data="popular")],
         [InlineKeyboardButton(text="✍️ Написать свой вопрос", callback_data="ask")],
-        [InlineKeyboardButton(text="🆓 Бесплатный пробный вопрос", callback_data="free_question")],
         [InlineKeyboardButton(text="🚘 Услуги в игре", callback_data="services")]
     ])
 
@@ -369,14 +373,17 @@ f"""🧾 Чек
 reply_markup=back_menu()
 )
 
-    await bot.send_message(
-        ADMIN_ID,
-f"""📥 Новый заказ
+  if o[5] == "free":
+    text = "🆓 Новый бесплатный вопрос"
+else:
+    text = "📦 Новый заказ"
+
+await bot.send_message(
+    ADMIN_ID,
+    f"""{text}
 
 👤 {o[3]}
 📄 {o[4]}
-
-📅 {o[8]}
 
 /admin"""
 )
@@ -443,15 +450,16 @@ async def stats_menu(call: CallbackQuery):
 
     today = datetime.now().strftime("%Y-%m-%d")
 
-    cursor.execute("SELECT starts FROM stats WHERE date=?", (today,))
-    row = cursor.fetchone()
-
-    starts = row[0] if row else 0
+    cursor.execute(
+        "SELECT COUNT(*) FROM orders WHERE status='done' AND date LIKE ?",
+        (today + "%",)
+    )
+    today_done = cursor.fetchone()[0]
 
     text = f"""📊 Аналитика
 
-Выполнено заказов: {done}
-Запусков /start сегодня: {starts}
+Выполнено заказов всего: {done}
+Выполнено заказов сегодня: {today_done}
 """
 
     kb = InlineKeyboardMarkup(inline_keyboard=[
@@ -522,3 +530,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
