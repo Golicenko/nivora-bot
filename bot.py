@@ -204,6 +204,7 @@ datetime.now().strftime("%Y-%m-%d %H:%M")
         provider_token="",
         currency="XTR",
         prices=[LabeledPrice(label="Ответ", amount=1)]
+        reply_markup=back_menu()
     )
 
 # ============================================================
@@ -349,7 +350,6 @@ reply_markup=back_menu()
 async def checkout(pre_checkout_query: PreCheckoutQuery):
     await bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)
 
-
 @dp.message(F.successful_payment)
 async def payment(message: Message):
 
@@ -373,14 +373,14 @@ f"""🧾 Чек
 reply_markup=back_menu()
 )
 
-  if o[5] == "free":
-    text = "🆓 Новый бесплатный вопрос"
-else:
-    text = "📦 Новый заказ"
+    if o[5] == "free":
+        text = "🆓 Новый бесплатный вопрос"
+    else:
+        text = "📦 Новый заказ"
 
-await bot.send_message(
-    ADMIN_ID,
-    f"""{text}
+    await bot.send_message(
+        ADMIN_ID,
+f"""{text}
 
 👤 {o[3]}
 📄 {o[4]}
@@ -417,7 +417,7 @@ async def admin_new(call: CallbackQuery):
         ])
 
     if not buttons:
-        buttons.append([InlineKeyboardButton(text="❗ Заказов нет", callback_data=f"order_{o[0]}")])
+       buttons.append([InlineKeyboardButton(text="❗ Заказов нет", callback_data="none")])
 
     buttons.append([InlineKeyboardButton(text="⬅ Назад", callback_data="admin_back")])
 
@@ -530,4 +530,5 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
