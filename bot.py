@@ -283,34 +283,60 @@ async def receive_question(message: Message, state: FSMContext):
         await message.answer("❗ Максимум 150 символов")
         return
 
-    cursor.execute("""
-INSERT INTO orders(user_id,username,name,text,type,price,status,date)
-VALUES(?,?,?,?,?,?,?,?)
-""",(
-message.from_user.id,
-message.from_user.username,
-message.from_user.first_name,
-message.text,
-"question",
-1,
-"waiting_payment",
-datetime.now().strftime("%Y-%m-%d %H:%M")
-))
+    user_id = message.from_user.id
 
-    order_id = cursor.lastrowid
-    db.commit()
+    cursor.execute("SELECT free_used FROM users WHERE user_id=?", (user_id,))
+    row = cursor.fetchone()
+
+    # если бесплатный еще не использован
+    if row and row[0] == 1:
+
+        cursor.execute("""
+        INSERT INTO orders(user_id,username,name,text,type,price,status,date)
+        VALUES(?,?,?,?,?,?,?,?)
+        """,(
+        message.from_user.id,
+        message.from_user.username,
+        message.from_user.first_name,
+        message.text,
+        "question",
+        1,
+        "waiting_payment",
+        datetime.now().strftime("%Y-%m-%d %H:%M")
+        ))
+
+        order_id = cursor.lastrowid
+        db.commit()
+
+        await bot.send_invoice(
+            message.from_user.id,
+            title="Ответ на вопрос",
+            description=message.text,
+            payload=f"order_{order_id}",
+            provider_token="",
+            currency="XTR",
+            prices=[LabeledPrice(label="Ответ", amount=1)],
+            reply_markup=back_menu()
+        )
+
+    else:
+
+        cursor.execute("UPDATE users SET free_used=1 WHERE user_id=?", (user_id,))
+        db.commit()
+
+        await message.answer("✅ Бесплатный вопрос отправлен!")
+
+        await bot.send_message(
+            ADMIN_ID,
+f"""🆓 Новый бесплатный вопрос
+
+👤 {message.from_user.first_name}
+📄 {message.text}
+
+/admin"""
+        )
 
     await state.clear()
-
-    await bot.send_invoice(
-        message.from_user.id,
-        title="Ответ на вопрос",
-        description=message.text,
-        payload=f"order_{order_id}",
-        provider_token="",
-        currency="XTR",
-        prices=[LabeledPrice(label="Ответ", amount=1)]
-    )
 
 # ============================================================
 # FREE QUESTION (FIXED)
@@ -530,6 +556,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
