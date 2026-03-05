@@ -1,11 +1,11 @@
+
 # ============================================================
-# TELEGRAM BOT FULL FIXED VERSION
+# NIVORA AUTO FLOW BOT V2 (FIXED ERRORS ONLY)
 # ============================================================
 
 import asyncio
 import sqlite3
-from datetime import datetime, timedelta
-
+from datetime import datetime
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import (
     Message, CallbackQuery, InlineKeyboardMarkup,
@@ -43,6 +43,20 @@ date TEXT
 )
 """)
 
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS users(
+user_id INTEGER PRIMARY KEY,
+free_used INTEGER
+)
+""")
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS stats(
+date TEXT PRIMARY KEY,
+starts INTEGER
+)
+""")
+
 db.commit()
 
 # ============================================================
@@ -52,30 +66,27 @@ db.commit()
 class AskState(StatesGroup):
     waiting_question = State()
 
-class ReplyState(StatesGroup):
-    waiting_reply = State()
-
 # ============================================================
 # DATA
 # ============================================================
 
 POPULAR = [
 "📥 Как скачать Game Guardian",
-"⚙️ Как установить Game Guardian (Android 5-14)",
+"⚙️ Как установить Game Guardian",
 "📦 Как скачать виртуальное пространство",
 "🛠 Как настроить Game Guardian",
-"📘 Как пользоваться Game Guardian",
-"📱 Что делать если Android 15-16",
-"📜 Как скачать скрипт",
-"📂 Как установить скрипт",
-"🎮 Как пользоваться скриптом"
+"📘 Как пользоваться Game Guardian"
 ]
 
 SERVICES = [
-"👑 Макс. ранг","🎭 Открыть анимации","🏠 Открыть дома",
-"🏆 Отключить урон","⛽ Бесконечное топливо",
-"🚀 W16 двигатель","🔊 Открыть сигналы","💨 Открыть дым",
-"📀 Открыть диски","⚡ Хак скорости","💵 Деньги","🪙 Коины"
+"👑 Макс ранг",
+"🎭 Анимации",
+"🏠 Дома",
+"🏆 Без урона",
+"⛽ Бесконечное топливо",
+"🚀 W16 двигатель",
+"💵 Деньги",
+"🪙 Коины"
 ]
 
 # ============================================================
@@ -86,14 +97,20 @@ def main_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🤩 Популярные вопросы", callback_data="popular")],
         [InlineKeyboardButton(text="✍️ Написать свой вопрос", callback_data="ask")],
+        [InlineKeyboardButton(text="🆓 Бесплатный пробный вопрос", callback_data="free_question")],
         [InlineKeyboardButton(text="🚘 Услуги в игре", callback_data="services")]
+    ])
+
+def back_menu():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="⬅ Назад в меню", callback_data="back")]
     ])
 
 def admin_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📥 Новые заказы", callback_data="admin_new")],
         [InlineKeyboardButton(text="✅ Готовые", callback_data="admin_done")],
-        [InlineKeyboardButton(text="📊 Статистика", callback_data="stats_menu")]
+        [InlineKeyboardButton(text="📊 Аналитика", callback_data="stats_menu")]
     ])
 
 # ============================================================
@@ -103,13 +120,25 @@ def admin_menu():
 @dp.message(Command("start"))
 async def start(message: Message):
 
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    cursor.execute("SELECT * FROM stats WHERE date=?", (today,))
+    row = cursor.fetchone()
+
+    if row:
+        cursor.execute("UPDATE stats SET starts = starts + 1 WHERE date=?", (today,))
+    else:
+        cursor.execute("INSERT INTO stats VALUES(?,1)", (today,))
+
+    db.commit()
+
     await message.answer(
-"""Здравствуй, юзер! 👋
+"""👋 Добро пожаловать!
 
-Здесь ты можешь решить свои проблемы с Game Guardian
-или виртуальным пространством.
+Я помогу решить проблемы
+с Game Guardian и Virtual Space.
 
-Выбери подходящий вариант ниже 👇
+Выберите действие ниже 👇
 """,
 reply_markup=main_menu()
 )
@@ -118,22 +147,22 @@ reply_markup=main_menu()
 # BACK
 # ============================================================
 
-@dp.callback_query(F.data=="back")
-async def back(call:CallbackQuery):
-    await call.message.edit_text("🏠 Главное меню",reply_markup=main_menu())
+@dp.callback_query(F.data == "back")
+async def back(call: CallbackQuery):
+    await call.message.edit_text("🏠 Главное меню", reply_markup=main_menu())
 
 # ============================================================
-# POPULAR QUESTIONS
+# POPULAR
 # ============================================================
 
-@dp.callback_query(F.data=="popular")
-async def popular(call:CallbackQuery):
+@dp.callback_query(F.data == "popular")
+async def popular(call: CallbackQuery):
 
-    buttons=[]
-    for i,q in enumerate(POPULAR):
-        buttons.append([InlineKeyboardButton(text=q,callback_data=f"pq_{i}")])
+    buttons = []
+    for i, q in enumerate(POPULAR):
+        buttons.append([InlineKeyboardButton(text=q, callback_data=f"pq_{i}")])
 
-    buttons.append([InlineKeyboardButton(text="⬅ Назад",callback_data="back")])
+    buttons.append([InlineKeyboardButton(text="⬅ Назад", callback_data="back")])
 
     await call.message.edit_text(
         "🤩 Популярные вопросы",
@@ -141,10 +170,10 @@ async def popular(call:CallbackQuery):
     )
 
 @dp.callback_query(F.data.startswith("pq_"))
-async def buy_pop(call:CallbackQuery):
+async def buy_pop(call: CallbackQuery):
 
-    index=int(call.data.split("_")[1])
-    question=POPULAR[index]
+    index = int(call.data.split("_")[1])
+    question = POPULAR[index]
 
     cursor.execute("""
 INSERT INTO orders(user_id,username,name,text,type,price,status,date)
@@ -160,7 +189,7 @@ question,
 datetime.now().strftime("%Y-%m-%d %H:%M")
 ))
 
-    order_id=cursor.lastrowid
+    order_id = cursor.lastrowid
     db.commit()
 
     await bot.send_invoice(
@@ -170,21 +199,21 @@ datetime.now().strftime("%Y-%m-%d %H:%M")
         payload=f"order_{order_id}",
         provider_token="",
         currency="XTR",
-        prices=[LabeledPrice(label="Ответ",amount=1)]
+        prices=[LabeledPrice(label="Ответ", amount=1)]
     )
 
 # ============================================================
 # SERVICES
 # ============================================================
 
-@dp.callback_query(F.data=="services")
-async def services(call:CallbackQuery):
+@dp.callback_query(F.data == "services")
+async def services(call: CallbackQuery):
 
-    buttons=[]
-    for i,s in enumerate(SERVICES):
-        buttons.append([InlineKeyboardButton(text=s,callback_data=f"service_{i}")])
+    buttons = []
+    for i, s in enumerate(SERVICES):
+        buttons.append([InlineKeyboardButton(text=s, callback_data=f"service_{i}")])
 
-    buttons.append([InlineKeyboardButton(text="⬅ Назад",callback_data="back")])
+    buttons.append([InlineKeyboardButton(text="⬅ Назад", callback_data="back")])
 
     await call.message.edit_text(
         "🚘 Игровые услуги\nЦена любой услуги 10⭐",
@@ -192,10 +221,10 @@ async def services(call:CallbackQuery):
     )
 
 @dp.callback_query(F.data.startswith("service_"))
-async def buy_service(call:CallbackQuery):
+async def buy_service(call: CallbackQuery):
 
-    index=int(call.data.split("_")[1])
-    service=SERVICES[index]
+    index = int(call.data.split("_")[1])
+    service = SERVICES[index]
 
     cursor.execute("""
 INSERT INTO orders(user_id,username,name,text,type,price,status,date)
@@ -211,7 +240,7 @@ service,
 datetime.now().strftime("%Y-%m-%d %H:%M")
 ))
 
-    order_id=cursor.lastrowid
+    order_id = cursor.lastrowid
     db.commit()
 
     await bot.send_invoice(
@@ -221,31 +250,31 @@ datetime.now().strftime("%Y-%m-%d %H:%M")
         payload=f"order_{order_id}",
         provider_token="",
         currency="XTR",
-        prices=[LabeledPrice(label="Услуга",amount=10)]
+        prices=[LabeledPrice(label="Услуга", amount=10)]
     )
 
 # ============================================================
 # ASK QUESTION
 # ============================================================
 
-@dp.callback_query(F.data=="ask")
-async def ask(call:CallbackQuery,state:FSMContext):
+@dp.callback_query(F.data == "ask")
+async def ask(call: CallbackQuery, state: FSMContext):
 
     await call.message.edit_text(
-"""Здравствуйте я Максим.
+"""✍️ Напишите ваш вопрос
 
-Пожалуйста напишите свой вопрос максимально понятно
-чтобы мы могли ответить максимально подробно.
-
-Максимум 150 символов"""
+Максимум 150 символов
+""",
+reply_markup=back_menu()
 )
 
     await state.set_state(AskState.waiting_question)
 
-@dp.message(AskState.waiting_question)
-async def receive_question(message:Message,state:FSMContext):
 
-    if len(message.text)>150:
+@dp.message(AskState.waiting_question)
+async def receive_question(message: Message, state: FSMContext):
+
+    if len(message.text) > 150:
         await message.answer("❗ Максимум 150 символов")
         return
 
@@ -263,7 +292,7 @@ message.text,
 datetime.now().strftime("%Y-%m-%d %H:%M")
 ))
 
-    order_id=cursor.lastrowid
+    order_id = cursor.lastrowid
     db.commit()
 
     await state.clear()
@@ -275,28 +304,59 @@ datetime.now().strftime("%Y-%m-%d %H:%M")
         payload=f"order_{order_id}",
         provider_token="",
         currency="XTR",
-        prices=[LabeledPrice(label="Ответ",amount=1)]
+        prices=[LabeledPrice(label="Ответ", amount=1)]
     )
+
+# ============================================================
+# FREE QUESTION (FIXED)
+# ============================================================
+
+@dp.callback_query(F.data == "free_question")
+async def free_question(call: CallbackQuery, state: FSMContext):
+
+    user_id = call.from_user.id
+
+    cursor.execute("SELECT free_used FROM users WHERE user_id=?", (user_id,))
+    row = cursor.fetchone()
+
+    if row and row[0] == 1:
+        await call.answer("Вы уже использовали бесплатный вопрос", show_alert=True)
+        return
+
+    if not row:
+        cursor.execute("INSERT INTO users VALUES(?,0)", (user_id,))
+        db.commit()
+
+    cursor.execute("UPDATE users SET free_used=1 WHERE user_id=?", (user_id,))
+    db.commit()
+
+    await call.message.edit_text(
+"🆓 Напишите ваш бесплатный вопрос",
+reply_markup=back_menu()
+)
+
+    await state.set_state(AskState.waiting_question)
 
 # ============================================================
 # PAYMENT
 # ============================================================
 
 @dp.pre_checkout_query()
-async def checkout(pre_checkout_query:PreCheckoutQuery):
-    await bot.answer_pre_checkout_query(pre_checkout_query.id,ok=True)
+async def checkout(pre_checkout_query: PreCheckoutQuery):
+    await bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)
+
 
 @dp.message(F.successful_payment)
-async def payment(message:Message):
+async def payment(message: Message):
 
-    payload=message.successful_payment.invoice_payload
-    order_id=int(payload.split("_")[1])
+    payload = message.successful_payment.invoice_payload
+    order_id = int(payload.split("_")[1])
 
-    cursor.execute("UPDATE orders SET status='new' WHERE id=?",(order_id,))
+    cursor.execute("UPDATE orders SET status='new' WHERE id=?", (order_id,))
     db.commit()
 
-    cursor.execute("SELECT * FROM orders WHERE id=?",(order_id,))
-    o=cursor.fetchone()
+    cursor.execute("SELECT * FROM orders WHERE id=?", (order_id,))
+    o = cursor.fetchone()
 
     await message.answer(
 f"""🧾 Чек
@@ -304,9 +364,9 @@ f"""🧾 Чек
 👤 {o[3]}
 📦 {o[4]}
 ⭐ {o[6]}
-📅 {o[8]}
 
-✅ Оплата прошла успешно"""
+✅ Оплата прошла успешно""",
+reply_markup=back_menu()
 )
 
     await bot.send_message(
@@ -314,62 +374,103 @@ f"""🧾 Чек
 f"""📥 Новый заказ
 
 👤 {o[3]}
-⏰ {o[8]}
+📄 {o[4]}
+
+📅 {o[8]}
 
 /admin"""
 )
 
 # ============================================================
-# ADMIN PANEL
+# ADMIN PANEL (FIXED)
 # ============================================================
 
 @dp.message(Command("admin"))
-async def admin(message:Message):
+async def admin(message: Message):
 
-    if message.from_user.id!=ADMIN_ID:
+    if message.from_user.id != ADMIN_ID:
         return
 
-    await message.answer("⚙️ Админ панель",reply_markup=admin_menu())
+    await message.answer("⚙️ Админ панель", reply_markup=admin_menu())
 
-# ============================================================
-# NEW ORDERS
-# ============================================================
+@dp.callback_query(F.data == "admin_new")
+async def admin_new(call: CallbackQuery):
 
-@dp.callback_query(F.data=="admin_new")
-async def admin_new(call:CallbackQuery):
+    cursor.execute("SELECT id,name,text,date FROM orders WHERE status='new'")
+    orders = cursor.fetchall()
 
-    cursor.execute("SELECT * FROM orders WHERE status='new'")
-    orders=cursor.fetchall()
-
-    buttons=[]
+    buttons = []
 
     for o in orders:
         buttons.append([
             InlineKeyboardButton(
-                text=f"{o[3]} | {o[8]}",
+                text=f"{o[1]} | {o[3]}",
                 callback_data=f"order_{o[0]}"
             )
         ])
 
     if not buttons:
-        buttons.append([
-            InlineKeyboardButton(text="❗ Заказов нет",callback_data="none")
-        ])
+        buttons.append([InlineKeyboardButton(text="❗ Заказов нет", callback_data=f"order_{o[0]}")])
 
-    buttons.append([
-InlineKeyboardButton(text="⬅ Назад", callback_data="admin_back")
-])
+    buttons.append([InlineKeyboardButton(text="⬅ Назад", callback_data="admin_back")])
+
     await call.message.edit_text(
-"📥 Новые заказы",
-reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons)
-)
+        "📥 Новые заказы",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons)
+    )
+
+@dp.callback_query(F.data == "admin_done")
+async def admin_done(call: CallbackQuery):
+
+    cursor.execute("SELECT name,text FROM orders WHERE status='done'")
+    orders = cursor.fetchall()
+
+    text = "✅ Выполненные заказы\n\n"
+
+    if not orders:
+        text += "Нет заказов"
+    else:
+        for o in orders:
+            text += f"{o[0]} — {o[1]}\n"
+
+    await call.message.edit_text(text, reply_markup=admin_menu())
+
+@dp.callback_query(F.data == "stats_menu")
+async def stats_menu(call: CallbackQuery):
+
+    cursor.execute("SELECT COUNT(*) FROM orders WHERE status='done'")
+    done = cursor.fetchone()[0]
+
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    cursor.execute("SELECT starts FROM stats WHERE date=?", (today,))
+    row = cursor.fetchone()
+
+    starts = row[0] if row else 0
+
+    text = f"""📊 Аналитика
+
+Выполнено заказов: {done}
+Запусков /start сегодня: {starts}
+"""
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="admin_back")]
+    ])
+
+    await call.message.edit_text(text, reply_markup=kb)
+
+@dp.callback_query(F.data == "admin_back")
+async def admin_back(call: CallbackQuery):
+    await call.message.edit_text("⚙️ Админ панель", reply_markup=admin_menu())
+
+@dp.callback_query(F.data == "none")
+async def none(call: CallbackQuery):
+    await call.answer("")
+
 
 # ============================================================
-# VIEW ORDER
-# ============================================================
-
-# ============================================================
-# VIEW ORDER
+# ORDER VIEW (ADDED FIX)
 # ============================================================
 
 @dp.callback_query(F.data.startswith("order_"))
@@ -384,210 +485,40 @@ async def view_order(call: CallbackQuery):
         await call.answer("Заказ не найден")
         return
 
-    text = f"""
-📦 Заказ #{o[0]}
+    text = f"""📦 Заказ #{o[0]}
 
-👤 Имя: {o[3]}
-🔗 Username: @{o[2]}
-
-📄 Текст:
-{o[4]}
-
-🕒 Время: {o[8]}
+👤 {o[3]}
+📄 {o[4]}
+📅 {o[8]}
 """
 
     kb = InlineKeyboardMarkup(inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text="✉️ Ответить",
-                callback_data=f"reply_{order_id}"
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text="👤 Перейти к пользователю",
-                url=f"tg://user?id={o[1]}"
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text="⬅ Назад",
-                callback_data="admin_new"
-            )
-        ]
+        [InlineKeyboardButton(text="✅ Завершить заказ", callback_data=f"done_{order_id}")],
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="admin_new")]
     ])
 
     await call.message.edit_text(text, reply_markup=kb)
 
-# =====================================================
-# REPLY
-# =====================================================
 
-@dp.callback_query(F.data.startswith("reply_"))
-async def reply_start(call: CallbackQuery, state: FSMContext):
+# ============================================================
+# MARK DONE (ADDED FIX)
+# ============================================================
 
-    order_id = call.data.split("_")[1]
+@dp.callback_query(F.data.startswith("done_"))
+async def mark_done(call: CallbackQuery):
 
-    await state.update_data(order_id=order_id)
+    order_id = int(call.data.split("_")[1])
 
-    # удаляем сообщение заказа
-    try:
-        await call.message.delete()
-    except Exception:
-        pass
-
-    msg = await bot.send_message(
-        ADMIN_ID,
-        "✍ Напишите ответ"
-    )
-
-    await state.update_data(reply_msg=msg.message_id)
-
-    await state.set_state(ReplyState.waiting_reply)
-
-
-@dp.message(ReplyState.waiting_reply)
-async def reply_send(message: Message, state: FSMContext):
-
-    data = await state.get_data()
-    order_id = data["order_id"]
-    reply_msg = data["reply_msg"]
-
-    cursor.execute("SELECT user_id FROM orders WHERE id=?", (order_id,))
-    row = cursor.fetchone()
-
-    if not row:
-        await state.clear()
-        return
-
-    user_id = row[0]
-
-    kb = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(text="⬅ Назад", callback_data="back")]
-        ]
-    )
-
-    # отправляем ответ клиенту
-    await bot.send_message(
-        user_id,
-        f"""✉️ Ответ
-
-{message.text}""",
-        reply_markup=kb
-    )
-
-    # меняем статус заказа
-    cursor.execute(
-        "UPDATE orders SET status='done' WHERE id=?",
-        (order_id,)
-    )
+    cursor.execute("UPDATE orders SET status='done' WHERE id=?", (order_id,))
     db.commit()
 
-    await state.clear()
-
-    # удаляем сообщение админа
-    try:
-        await message.delete()
-    except Exception:
-        pass
-
-    # удаляем сообщение "Напишите ответ"
-    try:
-        await bot.delete_message(ADMIN_ID, reply_msg)
-    except Exception:
-        pass
-
-    # показываем админ меню
-    await bot.send_message(
-        ADMIN_ID,
-        "⚙️ Админ панель",
-        reply_markup=admin_menu()
-    )
+    await call.message.edit_text("✅ Заказ завершен", reply_markup=admin_menu())
 
 # ============================================================
-# DONE ORDERS
-# ============================================================
 
-@dp.callback_query(F.data=="admin_done")
-async def admin_done(call:CallbackQuery):
-
-    cursor.execute("SELECT * FROM orders WHERE status='done'")
-    orders=cursor.fetchall()
-
-    text="✅ Готовые заказы\n\n"
-
-    if not orders:
-        text+="Заказов нет"
-
-    else:
-        for o in orders:
-            text+=f"{o[3]} | {o[8]}\n"
-
-    await call.message.edit_text(text,reply_markup=admin_menu())
-
-# ============================================================
-# STATS
-# ============================================================
-
-def get_stats(days=None):
-
-    if days:
-        date=(datetime.now()-timedelta(days=days)).strftime("%Y-%m-%d %H:%M")
-        cursor.execute("SELECT COUNT(*), SUM(price) FROM orders WHERE date>=?",(date,))
-    else:
-        cursor.execute("SELECT COUNT(*), SUM(price) FROM orders")
-
-    data=cursor.fetchone()
-    return data[0], data[1] or 0
-
-@dp.callback_query(F.data=="stats_menu")
-async def stats_menu(call:CallbackQuery):
-
-    kb=InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="1 день",callback_data="stats_1")],
-        [InlineKeyboardButton(text="7 дней",callback_data="stats_7")],
-        [InlineKeyboardButton(text="30 дней",callback_data="stats_30")],
-        [InlineKeyboardButton(text="Все время",callback_data="stats_all")],
-        [InlineKeyboardButton(text="⬅ Назад",callback_data="admin_back")]
-    ])
-
-    await call.message.edit_text("📊 Статистика",reply_markup=kb)
-
-@dp.callback_query(F.data=="admin_back")
-async def admin_back(call:CallbackQuery):
-    await call.message.edit_text("⚙️ Админ панель",reply_markup=admin_menu())
-
-@dp.callback_query(F.data.startswith("stats_"))
-async def stats(call: CallbackQuery):
-
-    p = call.data.split("_")[1]
-
-    if p == "all":
-        c, s = get_stats()
-        title = "Все время"
-    else:
-        days = int(p)
-        c, s = get_stats(days)
-        title = f"{days} дней"
-
-    kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="⬅ Назад", callback_data="stats_menu")]
-    ])
-
-    await call.message.edit_text(
-f"""📊 Статистика ({title})
-
-Заказы: {c}
-Заработано ⭐: {s}""",
-        reply_markup=kb
-    )
-@dp.callback_query(F.data=="none")
-async def none(call: CallbackQuery):
-    await call.answer("Заказов нет")
 async def main():
     print("BOT STARTED")
     await dp.start_polling(bot)
 
-if __name__=="__main__":
+if __name__ == "__main__":
     asyncio.run(main())
