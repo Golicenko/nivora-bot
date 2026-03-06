@@ -182,31 +182,30 @@ async def buy_pop(call: CallbackQuery):
     cursor.execute("""
 INSERT INTO orders(user_id,username,name,text,type,price,status,date)
 VALUES(?,?,?,?,?,?,?,?)
-""",(
-call.from_user.id,
-call.from_user.username,
-call.from_user.first_name,
-question,
-"popular",
-1,
-"waiting_payment",
-datetime.now().strftime("%Y-%m-%d %H:%M")
-))
+""", (
+        call.from_user.id,
+        call.from_user.username,
+        call.from_user.first_name,
+        question,
+        "popular",
+        1,
+        "waiting_payment",
+        datetime.now().strftime("%Y-%m-%d %H:%M")
+    ))
 
-   order_id = cursor.lastrowid
-db.commit()
+    order_id = cursor.lastrowid
+    db.commit()
 
-await bot.send_invoice(
-    call.from_user.id,
-    title="Ответ на вопрос",
-    description=question,
-    payload=f"order_{order_id}",
-    provider_token="",
-    currency="XTR",
-    prices=[LabeledPrice(label="Ответ", amount=1)],
-    reply_markup=back_menu()
-)
-
+    await bot.send_invoice(
+        call.from_user.id,
+        title="Ответ на вопрос",
+        description=question,
+        payload=f"order_{order_id}",
+        provider_token="",
+        currency="XTR",
+        prices=[LabeledPrice(label="Ответ", amount=1)],
+        reply_markup=back_menu()
+    )
 # ============================================================
 # SERVICES
 # ============================================================
@@ -556,6 +555,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
