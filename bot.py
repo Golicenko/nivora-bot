@@ -571,10 +571,14 @@ async def admin_back(call: CallbackQuery):
 async def none(call: CallbackQuery):
     await call.answer("")
 
+# ============================================================
+# ORDER VIEW
+# ============================================================
 
-# ============================================================
-# ORDER VIEW (ADDED FIX)
-# ============================================================
+class AdminReply(StatesGroup):
+    waiting_reply = State()
+
+
 @dp.callback_query(F.data.startswith("order_"))
 async def view_order(call: CallbackQuery):
 
@@ -610,8 +614,6 @@ async def view_order(call: CallbackQuery):
     ])
 
     await call.message.edit_text(text, reply_markup=kb)
-    class AdminReply(StatesGroup):
-    waiting_reply = State()
 
 
 @dp.callback_query(F.data.startswith("reply_"))
@@ -654,7 +656,7 @@ async def send_reply(message: Message, state: FSMContext):
     )
 
     await state.clear()
-    
+
 # ============================================================
 # MARK DONE (ADDED FIX)
 # ============================================================
@@ -677,6 +679,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
