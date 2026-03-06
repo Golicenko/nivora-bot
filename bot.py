@@ -632,6 +632,9 @@ async def view_order(call: CallbackQuery):
 # ============================================================
 # REPLY ORDER
 # ============================================================
+class UserQuestion(StatesGroup):
+    waiting = State()
+
 class AdminReply(StatesGroup):
     waiting_reply = State()
 
@@ -705,6 +708,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
