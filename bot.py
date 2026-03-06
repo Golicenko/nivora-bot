@@ -163,7 +163,7 @@ datetime.now().strftime("%Y-%m-%d %H:%M")
     order_id=cursor.lastrowid
     db.commit()
 
-    await bot.send_invoice(
+    await show_payment(call, question, 1, order_id)
         call.from_user.id,
         title="Ответ на вопрос",
         description=question,
@@ -214,7 +214,7 @@ datetime.now().strftime("%Y-%m-%d %H:%M")
     order_id=cursor.lastrowid
     db.commit()
 
-    await bot.send_invoice(
+    await show_payment(call, service, 10, order_id)
         call.from_user.id,
         title="Игровая услуга",
         description=service,
@@ -268,19 +268,62 @@ datetime.now().strftime("%Y-%m-%d %H:%M")
 
     await state.clear()
 
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="⭐ Заплатить 1", callback_data=f"pay_{order_id}")],
+    [InlineKeyboardButton(text="⬅ Назад", callback_data="back")]
+])
+
+await message.answer(
+f"""📦 Ваш вопрос
+
+{message.text}
+
+💰 Цена: 1 ⭐""",
+reply_markup=kb
+)
+
+# ============================================================
+# PAYMENT SCREEN
+# ============================================================
+
+async def show_payment(call, text, price, order_id):
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=f"⭐ Заплатить {price}", callback_data=f"pay_{order_id}")],
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="back")]
+    ])
+
+    await call.message.edit_text(
+f"""📦 Покупка
+
+{text}
+
+💰 Цена: {price} ⭐""",
+        reply_markup=kb
+    )
+
+
+@dp.callback_query(F.data.startswith("pay_"))
+async def pay(call: CallbackQuery):
+
+    order_id = int(call.data.replace("pay_", ""))
+
+    cursor.execute("SELECT text, price FROM orders WHERE id=?", (order_id,))
+    o = cursor.fetchone()
+
+    if not o:
+        await call.answer("Ошибка заказа")
+        return
+
     await bot.send_invoice(
-        message.from_user.id,
-        title="Ответ на вопрос",
-        description=message.text,
+        call.from_user.id,
+        title="Оплата",
+        description=o[0],
         payload=f"order_{order_id}",
         provider_token="",
         currency="XTR",
-        prices=[LabeledPrice(label="Ответ",amount=1)]
+        prices=[LabeledPrice(label="Оплата", amount=o[1])]
     )
-
-# ============================================================
-# PAYMENT
-# ============================================================
 
 @dp.pre_checkout_query()
 async def checkout(pre_checkout_query:PreCheckoutQuery):
@@ -591,3 +634,4 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
