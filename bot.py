@@ -160,25 +160,31 @@ async def back(call: CallbackQuery):
     await call.message.edit_text("🏠 Главное меню", reply_markup=main_menu())
 
 # ============================================================
-# POPULAR
+# POPULAR QUESTIONS
 # ============================================================
 
 @dp.callback_query(F.data == "popular")
 async def popular(call: CallbackQuery):
 
     buttons = []
-    for i, q in enumerate(POPULAR):
-        buttons.append([InlineKeyboardButton(text=q, callback_data=f"pq_{i}")])
 
-    buttons.append([InlineKeyboardButton(text="⬅ Назад", callback_data="back")])
+    for i, q in enumerate(POPULAR):
+        buttons.append([
+            InlineKeyboardButton(text=q, callback_data=f"pq_{i}")
+        ])
+
+    buttons.append([
+        InlineKeyboardButton(text="⬅ Назад", callback_data="back")
+    ])
 
     await call.message.edit_text(
         "🤩 Популярные вопросы",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons)
     )
 
+
 @dp.callback_query(F.data.startswith("pq_"))
-async def buy_pop(call: CallbackQuery):
+async def show_popular(call: CallbackQuery):
 
     index = int(call.data.split("_")[1])
     question = POPULAR[index]
@@ -189,15 +195,16 @@ async def buy_pop(call: CallbackQuery):
     ])
 
     await call.message.edit_text(
-        f"""❓ Вопрос
+f"""❓ Вопрос
 
 {question}
 
-Нажмите кнопку ниже чтобы получить ответ
-""",
+Нажмите кнопку ниже чтобы получить ответ""",
         reply_markup=kb
     )
-    @dp.callback_query(F.data.startswith("pay_pop_"))
+
+
+@dp.callback_query(F.data.startswith("pay_pop_"))
 async def pay_pop(call: CallbackQuery):
 
     index = int(call.data.split("_")[2])
@@ -300,23 +307,17 @@ reply_markup=back_menu()
 
 
 @dp.message(AskState.waiting_question)
+@dp.message(AskState.waiting_question)
 async def receive_question(message: Message, state: FSMContext):
 
     if len(message.text) > 150:
         await message.answer("❗ Максимум 150 символов")
         return
 
-    user_id = message.from_user.id
-
-    cursor.execute("SELECT free_used FROM users WHERE user_id=?", (user_id,))
-    row = cursor.fetchone()
-
-    if row and row[0] == 1:
-
-        cursor.execute("""
-        INSERT INTO orders(user_id,username,name,text,type,price,status,date)
-        VALUES(?,?,?,?,?,?,?,?)
-        """,(
+    cursor.execute("""
+INSERT INTO orders(user_id,username,name,text,type,price,status,date)
+VALUES(?,?,?,?,?,?,?,?)
+""",(
         message.from_user.id,
         message.from_user.username,
         message.from_user.first_name,
@@ -325,43 +326,24 @@ async def receive_question(message: Message, state: FSMContext):
         1,
         "waiting_payment",
         datetime.now().strftime("%Y-%m-%d %H:%M")
-        ))
+    ))
 
-        order_id = cursor.lastrowid
-        db.commit()
+    order_id = cursor.lastrowid
+    db.commit()
 
-        await bot.send_invoice(
-            message.from_user.id,
-            title="Ответ на вопрос",
-            description=message.text,
-            payload=f"order_{order_id}",
-            provider_token="",
-            currency="XTR",
-            prices=[LabeledPrice(label="Ответ", amount=1)],
-            reply_markup=back_menu()
-        )
-
-    else:
-
-        cursor.execute("UPDATE users SET free_used=1 WHERE user_id=?", (user_id,))
-        db.commit()
-
-        await message.answer(
-            "✅ Бесплатный вопрос отправлен!",
-            reply_markup=main_menu()
-        )
-
-        await bot.send_message(
-            ADMIN_ID,
-            f"""📩 Новый бесплатный вопрос
-
-👤 {message.from_user.first_name}
-📄 {message.text}
-
-/admin"""
-        )
+    await bot.send_invoice(
+        message.from_user.id,
+        title="Ответ на вопрос",
+        description=message.text,
+        payload=f"order_{order_id}",
+        provider_token="",
+        currency="XTR",
+        prices=[LabeledPrice(label="Ответ", amount=1)],
+        reply_markup=back_menu()
+    )
 
     await state.clear()
+    
 # =========================================
 # FREE QUESTION
 # =========================================
@@ -402,6 +384,32 @@ async def free_question(call: CallbackQuery, state: FSMContext):
 
     # устанавливаем состояние
     await state.set_state(AskState.waiting_free)
+
+@dp.message(AskState.waiting_free)
+async def receive_free(message: Message, state: FSMContext):
+
+    cursor.execute(
+        "UPDATE users SET free_used=1 WHERE user_id=?",
+        (message.from_user.id,)
+    )
+    db.commit()
+
+    await message.answer(
+        "✅ Бесплатный вопрос отправлен!",
+        reply_markup=main_menu()
+    )
+
+    await bot.send_message(
+        ADMIN_ID,
+        f"""📩 Новый бесплатный вопрос
+
+👤 {message.from_user.first_name}
+📄 {message.text}
+
+/admin"""
+    )
+
+    await state.clear()
 # ============================================================
 # PAYMENT
 # ============================================================
@@ -599,6 +607,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
