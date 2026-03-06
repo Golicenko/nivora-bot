@@ -576,7 +576,7 @@ async def none(call: CallbackQuery):
 # ============================================================
 
 class AdminReply(StatesGroup):
-    waiting_reply = State()     
+    waiting_reply = State()
 
 
 @dp.callback_query(F.data.startswith("order_"))
@@ -594,33 +594,39 @@ async def view_order(call: CallbackQuery):
 📅 {o[8]}
 """
 
- kb = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text="✏️ Ответить",
-                callback_data=f"reply_{order_id}"
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text="👤 Перейти на аккаунт",
-                url=f"https://t.me/{o[2]}" if o[2] else f"tg://user?id={o[1]}"
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text="⬅ Назад",
-                callback_data="admin_new"
-            )
+    kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+
+            [
+                InlineKeyboardButton(
+                    text="✏️ Ответить",
+                    callback_data=f"reply_{order_id}"
+                )
+            ],
+
+            [
+                InlineKeyboardButton(
+                    text="👤 Перейти на аккаунт",
+                    url=f"https://t.me/{o[2]}" if o[2] else f"tg://user?id={o[1]}"
+                )
+            ],
+
+            [
+                InlineKeyboardButton(
+                    text="⬅ Назад",
+                    callback_data="admin_new"
+                )
+            ]
+
         ]
-    ]
-)
+    )
 
-await call.message.edit_text(text, reply_markup=kb) 
-
+    await call.message.edit_text(text, reply_markup=kb)
 
 
+# ============================================================
+# REPLY ORDER
+# ============================================================
 
 @dp.callback_query(F.data.startswith("reply_"))
 async def reply_order(call: CallbackQuery, state: FSMContext):
@@ -642,7 +648,11 @@ async def send_reply(message: Message, state: FSMContext):
     data = await state.get_data()
     order_id = data["order_id"]
 
-    cursor.execute("SELECT user_id FROM orders WHERE id=?", (order_id,))
+    cursor.execute(
+        "SELECT user_id FROM orders WHERE id=?",
+        (order_id,)
+    )
+
     user_id = cursor.fetchone()[0]
 
     await bot.send_message(
@@ -653,16 +663,19 @@ async def send_reply(message: Message, state: FSMContext):
 """
     )
 
-    cursor.execute("UPDATE orders SET status='done' WHERE id=?", (order_id,))
+    cursor.execute(
+        "UPDATE orders SET status='done' WHERE id=?",
+        (order_id,)
+    )
+
     db.commit()
 
     await message.answer(
-        "✅ Ответ отправлен. Заказ завершен",
+        "✅ Ответ отправлен. Заказ завершён",
         reply_markup=admin_menu()
     )
 
     await state.clear()
-
 # ============================================================
 # MARK DONE (ADDED FIX)
 # ============================================================
@@ -685,6 +698,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
