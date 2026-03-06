@@ -150,7 +150,7 @@ async def start(message: Message):
 Напишите ваш вопрос 👇
 """
 
-    await message.answer(text)
+await message.answer(text, reply_markup=main_menu())
 # ============================================================
 # BACK
 # ============================================================
@@ -307,8 +307,7 @@ reply_markup=back_menu()
 
 
 @dp.message(AskState.waiting_question)
-@dp.message(AskState.waiting_question)
-async def receive_question(message: Message, state: FSMContext):
+async def receive_question
 
     if len(message.text) > 150:
         await message.answer("❗ Максимум 150 символов")
@@ -388,20 +387,44 @@ async def free_question(call: CallbackQuery, state: FSMContext):
 @dp.message(AskState.waiting_free)
 async def receive_free(message: Message, state: FSMContext):
 
+    # создаем заказ
+    cursor.execute("""
+INSERT INTO orders(user_id,username,name,text,type,price,status,date)
+VALUES(?,?,?,?,?,?,?,?)
+""",(
+        message.from_user.id,
+        message.from_user.username,
+        message.from_user.first_name,
+        message.text,
+        "free",
+        0,
+        "new",
+        datetime.now().strftime("%Y-%m-%d %H:%M")
+    ))
+
+    db.commit()
+
     cursor.execute(
         "UPDATE users SET free_used=1 WHERE user_id=?",
         (message.from_user.id,)
     )
+
     db.commit()
 
-    await message.answer(
-        "✅ Бесплатный вопрос отправлен!",
+    # удаляем сообщение пользователя
+    await message.delete()
+
+    # отправляем меню
+    await bot.send_message(
+        message.from_user.id,
+        "✅ Бесплатный вопрос отправлен",
         reply_markup=main_menu()
     )
 
+    # уведомляем админа
     await bot.send_message(
         ADMIN_ID,
-        f"""📩 Новый бесплатный вопрос
+        f"""🆓 Новый бесплатный вопрос
 
 👤 {message.from_user.first_name}
 📄 {message.text}
@@ -607,6 +630,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
