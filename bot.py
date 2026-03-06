@@ -583,9 +583,10 @@ async def admin_back(call: CallbackQuery):
 async def none(call: CallbackQuery):
     await call.answer("")
 
-# ============================================================
+# =====================================
 # ORDER VIEW
-# ============================================================
+# =====================================
+
 @dp.callback_query(F.data.startswith("order_"))
 async def view_order(call: CallbackQuery):
 
@@ -594,40 +595,40 @@ async def view_order(call: CallbackQuery):
     cursor.execute("SELECT * FROM orders WHERE id=?", (order_id,))
     o = cursor.fetchone()
 
-    text = f"""📦 Заказ #{o[0]}
+    text = f"""
+📦 Заказ #{o[0]}
 
-👤 {o[3]}
-📄 {o[4]}
-📅 {o[8]}
+👤 Пользователь: {o[3]}
+📄 Вопрос: {o[4]}
+📅 Дата: {o[8]}
 """
 
-    kb = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text="✏️ Ответить",
-                    callback_data=f"reply_{order_id}"
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text="👤 Перейти на аккаунт",
-                    url=f"https://t.me/{o[2]}" if o[2] else f"tg://user?id={o[1]}"
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text="⬅ Назад",
-                    callback_data="admin_new"
-                )
-            ]
-        ]
-    )
+    kb = InlineKeyboardMarkup(inline_keyboard=[
 
-    await call.message.edit_text(
-        text,
-        reply_markup=kb
-    )
+        [
+            InlineKeyboardButton(
+                text="✏ Ответить",
+                callback_data=f"reply_{order_id}"
+            )
+        ],
+
+        [
+            InlineKeyboardButton(
+                text="👤 Перейти на аккаунт",
+                url=f"https://t.me/{o[2]}" if o[2] else f"tg://user?id={o[1]}"
+            )
+        ],
+
+        [
+            InlineKeyboardButton(
+                text="⬅ Назад",
+                callback_data="admin_new"
+            )
+        ]
+
+    ])
+
+    await call.message.edit_text(text, reply_markup=kb)
 # ============================================================
 # REPLY ORDER
 # ============================================================
@@ -704,6 +705,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
