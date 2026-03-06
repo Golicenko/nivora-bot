@@ -124,12 +124,14 @@ def admin_menu():
 @dp.message(Command("start"))
 async def start(message: Message):
 
-    text = """👋 Добро пожаловать!
+    text = """здраствуй:
+• Game Guardian
+• Virtual Space
 
-Я помогу решить проблемы
-с Game Guardian и Virtual Space.
+🚗 Приобрести услуги для игры:
+Car Parking Multiplayer
 
-Выберите пункт ниже 👇
+Выберите нужный раздел ниже 👇
 """
 
     await message.answer(
@@ -618,6 +620,8 @@ async def view_order(call: CallbackQuery):
 # ============================================================
 # REPLY ORDER
 # ============================================================
+class AdminReply(StatesGroup):
+    waiting_reply = State()
 
 @dp.callback_query(F.data.startswith("reply_"))
 async def reply_order(call: CallbackQuery, state: FSMContext):
@@ -689,6 +693,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
