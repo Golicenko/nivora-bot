@@ -175,59 +175,59 @@ async def popular(call: CallbackQuery):
 
 
 @dp.callback_query(F.data.startswith("pq_"))
-async def show_popular(call: CallbackQuery):
+async def popular_question(call: CallbackQuery):
 
     index = int(call.data.split("_")[1])
     question = POPULAR[index]
 
     kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="💬 Ответ на вопрос — 1⭐", callback_data=f"pay_pop_{index}")],
-        [InlineKeyboardButton(text="⬅ Назад", callback_data="popular")]
+
+        [InlineKeyboardButton(
+            text="💳 Ответ на вопрос — 1⭐",
+            callback_data=f"pay_pop_{index}"
+        )],
+
+        [InlineKeyboardButton(
+            text="⬅ Назад",
+            callback_data="popular"
+        )]
+
     ])
 
     await call.message.edit_text(
-f"""❓ Вопрос
+        f"""❓ Вопрос:
 
 {question}
 
-Нажмите кнопку ниже чтобы получить ответ""",
+Нажмите кнопку ниже чтобы получить ответ.
+""",
         reply_markup=kb
     )
 
-
 @dp.callback_query(F.data.startswith("pay_pop_"))
-async def pay_pop(call: CallbackQuery):
+async def pay_popular(call: CallbackQuery):
 
     index = int(call.data.split("_")[2])
     question = POPULAR[index]
 
     cursor.execute("""
-INSERT INTO orders(user_id,username,name,text,type,price,status,date)
-VALUES(?,?,?,?,?,?,?,?)
-""", (
+    INSERT INTO orders(user_id, username, text, type, price, status)
+    VALUES(?,?,?,?,?,?)
+    """, (
         call.from_user.id,
         call.from_user.username,
-        call.from_user.first_name,
         question,
         "popular",
         1,
-        "waiting_payment",
-        datetime.now().strftime("%Y-%m-%d %H:%M")
+        "new"
     ))
 
-    order_id = cursor.lastrowid
     db.commit()
 
-    await bot.send_invoice(
-        call.from_user.id,
-        title="Ответ на вопрос",
-        description=question,
-        payload=f"order_{order_id}",
-        provider_token="",
-        currency="XTR",
-        prices=[LabeledPrice(label="Ответ", amount=1)],
-        reply_markup=back_menu()
+    await call.message.edit_text(
+        "✅ Заказ отправлен. Ожидайте ответ."
     )
+
 # ============================================================
 # SERVICES
 # ============================================================
@@ -286,56 +286,67 @@ datetime.now().strftime("%Y-%m-%d %H:%M")
 # ============================================================
 
 @dp.callback_query(F.data == "ask")
-async def ask(call: CallbackQuery, state: FSMContext):
+async def ask_question(call: CallbackQuery):
 
     await call.message.edit_text(
-"""✍️ Напишите ваш вопрос
-
-Максимум 150 символов
-""",
+        "✏ Напишите ваш вопрос:",
         reply_markup=back_menu()
     )
 
-    await state.set_state(AskState.waiting_question)
+    await state.set_state(UserQuestion.waiting)
 
+@dp.message(UserQuestion.waiting)
+async def save_question(message: Message, state: FSMContext):
 
-@dp.message(AskState.waiting_question)
-async def receive_question(message: Message, state: FSMContext):
+    text = message.text
 
-    if len(message.text) > 150:
-        await message.answer("❗ Максимум 150 символов")
-        return
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+
+        [InlineKeyboardButton(
+            text="💳 Ответить на вопрос — 1⭐",
+            callback_data="pay_custom"
+        )],
+
+        [InlineKeyboardButton(
+            text="⬅ Назад",
+            callback_data="back"
+        )]
+
+    ])
+
+    await message.answer(
+        f"""❓ Ваш вопрос:
+
+{text}
+
+Нажмите оплатить чтобы отправить вопрос.""",
+        reply_markup=kb
+    )
+
+    await state.update_data(question=text)
+
+@dp.callback_query(F.data == "pay_custom")
+async def pay_custom(call: CallbackQuery, state: FSMContext):
+
+    data = await state.get_data()
+    question = data["question"]
 
     cursor.execute("""
-INSERT INTO orders(user_id,username,name,text,type,price,status,date)
-VALUES(?,?,?,?,?,?,?,?)
-""",(
-        message.from_user.id,
-        message.from_user.username,
-        message.from_user.first_name,
-        message.text,
-        "question",
+    INSERT INTO orders(user_id, username, text, type, price, status)
+    VALUES(?,?,?,?,?,?)
+    """, (
+        call.from_user.id,
+        call.from_user.username,
+        question,
+        "custom",
         1,
-        "waiting_payment",
-        datetime.now().strftime("%Y-%m-%d %H:%M")
+        "new"
     ))
 
-    order_id = cursor.lastrowid
     db.commit()
 
-    # удаляем сообщение пользователя
-    await message.delete()
-
-    # отправляем оплату
-    await bot.send_invoice(
-        message.from_user.id,
-        title="Ответ на вопрос",
-        description=message.text,
-        payload=f"order_{order_id}",
-        provider_token="",
-        currency="XTR",
-        prices=[LabeledPrice(label="Ответ", amount=1)],
-        reply_markup=back_menu()
+    await call.message.edit_text(
+        "✅ Вопрос отправлен. Ожидайте ответ."
     )
 
     await state.clear()
@@ -693,6 +704,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
