@@ -121,7 +121,6 @@ def admin_menu():
 # ============================================================
 # START
 # ============================================================
-
 @dp.message(Command("start"))
 async def start(message: Message):
 
@@ -143,16 +142,15 @@ async def start(message: Message):
 
     db.commit()
 
-    await message.answer(
-"""👋 Добро пожаловать!
+    text = """👋 Добро пожаловать!
 
 Я помогу решить проблемы
 с Game Guardian и Virtual Space.
 
 Напишите ваш вопрос 👇
 """
-    )
 
+    await message.answer(text)
 # ============================================================
 # BACK
 # ============================================================
@@ -601,6 +599,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
