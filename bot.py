@@ -576,7 +576,7 @@ async def none(call: CallbackQuery):
 # ============================================================
 
 class AdminReply(StatesGroup):
-    waiting_reply = State()
+    waiting_reply = State()     
 
 
 @dp.callback_query(F.data.startswith("order_"))
@@ -613,7 +613,7 @@ async def view_order(call: CallbackQuery):
 
     ])
 
-    await call.message.edit_text(text, reply_markup=kb)
+   await call.message.edit_text(text, reply_markup=reply_markup)
 
 
 @dp.callback_query(F.data.startswith("reply_"))
@@ -679,6 +679,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
