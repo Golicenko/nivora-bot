@@ -288,6 +288,8 @@ datetime.now().strftime("%Y-%m-%d %H:%M")
     prices=[LabeledPrice(label="Услуга", amount=10)],
     reply_markup=back_menu()
 )
+
+
 # ============================================================
 # ASK QUESTION
 # ============================================================
@@ -300,14 +302,14 @@ async def ask(call: CallbackQuery, state: FSMContext):
 
 Максимум 150 символов
 """,
-reply_markup=back_menu()
-)
+        reply_markup=back_menu()
+    )
 
     await state.set_state(AskState.waiting_question)
 
 
 @dp.message(AskState.waiting_question)
-async def receive_question
+async def receive_question(message: Message, state: FSMContext):
 
     if len(message.text) > 150:
         await message.answer("❗ Максимум 150 символов")
@@ -330,6 +332,10 @@ VALUES(?,?,?,?,?,?,?,?)
     order_id = cursor.lastrowid
     db.commit()
 
+    # удаляем сообщение пользователя
+    await message.delete()
+
+    # отправляем оплату
     await bot.send_invoice(
         message.from_user.id,
         title="Ответ на вопрос",
@@ -342,7 +348,6 @@ VALUES(?,?,?,?,?,?,?,?)
     )
 
     await state.clear()
-    
 # =========================================
 # FREE QUESTION
 # =========================================
@@ -630,6 +635,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
