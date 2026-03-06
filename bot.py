@@ -185,6 +185,26 @@ async def buy_pop(call: CallbackQuery):
     index = int(call.data.split("_")[1])
     question = POPULAR[index]
 
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💬 Ответ на вопрос — 1⭐", callback_data=f"pay_pop_{index}")],
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="popular")]
+    ])
+
+    await call.message.edit_text(
+        f"""❓ Вопрос
+
+{question}
+
+Нажмите кнопку ниже чтобы получить ответ
+""",
+        reply_markup=kb
+    )
+    @dp.callback_query(F.data.startswith("pay_pop_"))
+async def pay_pop(call: CallbackQuery):
+
+    index = int(call.data.split("_")[2])
+    question = POPULAR[index]
+
     cursor.execute("""
 INSERT INTO orders(user_id,username,name,text,type,price,status,date)
 VALUES(?,?,?,?,?,?,?,?)
@@ -254,15 +274,15 @@ datetime.now().strftime("%Y-%m-%d %H:%M")
     db.commit()
 
     await bot.send_invoice(
-        call.from_user.id,
-        title="Игровая услуга",
-        description=service,
-        payload=f"order_{order_id}",
-        provider_token="",
-        currency="XTR",
-        prices=[LabeledPrice(label="Услуга", amount=10)]
-    )
-
+    call.from_user.id,
+    title="Игровая услуга",
+    description=service,
+    payload=f"order_{order_id}",
+    provider_token="",
+    currency="XTR",
+    prices=[LabeledPrice(label="Услуга", amount=10)],
+    reply_markup=back_menu()
+)
 # ============================================================
 # ASK QUESTION
 # ============================================================
@@ -293,7 +313,6 @@ async def receive_question(message: Message, state: FSMContext):
     cursor.execute("SELECT free_used FROM users WHERE user_id=?", (user_id,))
     row = cursor.fetchone()
 
-    # если бесплатный еще не использован
     if row and row[0] == 1:
 
         cursor.execute("""
@@ -329,23 +348,22 @@ async def receive_question(message: Message, state: FSMContext):
         cursor.execute("UPDATE users SET free_used=1 WHERE user_id=?", (user_id,))
         db.commit()
 
-await message.answer(
-    "✅ Бесплатный вопрос отправлен!",
-    reply_markup=main_menu()
-)
+        await message.answer(
+            "✅ Бесплатный вопрос отправлен!",
+            reply_markup=main_menu()
+        )
 
-await bot.send_message(
-    ADMIN_ID,
-    f"""📩 Новый бесплатный вопрос
+        await bot.send_message(
+            ADMIN_ID,
+            f"""📩 Новый бесплатный вопрос
 
 👤 {message.from_user.first_name}
 📄 {message.text}
 
 /admin"""
-)
+        )
 
-await state.clear()
-
+    await state.clear()
 # =========================================
 # FREE QUESTION
 # =========================================
@@ -583,6 +601,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
