@@ -193,10 +193,10 @@ question,
 datetime.now().strftime("%Y-%m-%d %H:%M")
 ))
 
-    order_id = cursor.lastrowid
-    db.commit()
+   order_id = cursor.lastrowid
+db.commit()
 
-  await bot.send_invoice(
+await bot.send_invoice(
     call.from_user.id,
     title="Ответ на вопрос",
     description=question,
@@ -556,6 +556,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
