@@ -1,9 +1,5 @@
-
 # ============================================================
-# TELEGRAM BOT FULL FIXED VERSION (PAYMENT CONFIRM + BACK)
-# Only change: before every payment there is a screen
-# [⭐ Pay] and [⬅ Back]
-# Nothing else simplified or removed
+# TELEGRAM BOT FULL FIXED VERSION
 # ============================================================
 
 import asyncio
@@ -76,10 +72,10 @@ POPULAR = [
 ]
 
 SERVICES = [
-"👑 Макс. ранг","🎭 Открыть анимации","🏠 Открыть дома",
+"👑 ранг кинг","🎭 Открыть анимации","🏠 Открыть дома 3",
 "🏆 Отключить урон","⛽ Бесконечное топливо",
 "🚀 W16 двигатель","🔊 Открыть сигналы","💨 Открыть дым",
-"📀 Открыть диски","⚡ Хак скорости","💵 Деньги","🪙 Коины"
+"📀 Открыть диски","⚡ сили 300/414/800","💵 Деньги","🪙 Коины"
 ]
 
 # ============================================================
@@ -144,34 +140,10 @@ async def popular(call:CallbackQuery):
         reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons)
     )
 
-# -------- CONFIRM SCREEN --------
-
 @dp.callback_query(F.data.startswith("pq_"))
-async def confirm_pop(call:CallbackQuery):
-
-    index=int(call.data.split("_")[1])
-    question=POPULAR[index]
-
-    kb=InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="⭐ Заплатить 1",callback_data=f"pay_pop_{index}")],
-        [InlineKeyboardButton(text="⬅ Назад",callback_data="popular")]
-    ])
-
-    await call.message.edit_text(
-f"""📦 Ответ на вопрос
-
-{question}
-
-Цена: ⭐1""",
-reply_markup=kb
-)
-
-# -------- PAYMENT --------
-
-@dp.callback_query(F.data.startswith("pay_pop_"))
 async def buy_pop(call:CallbackQuery):
 
-    index=int(call.data.split("_")[2])
+    index=int(call.data.split("_")[1])
     question=POPULAR[index]
 
     cursor.execute("""
@@ -219,34 +191,10 @@ async def services(call:CallbackQuery):
         reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons)
     )
 
-# -------- CONFIRM SERVICE --------
-
 @dp.callback_query(F.data.startswith("service_"))
-async def confirm_service(call:CallbackQuery):
-
-    index=int(call.data.split("_")[1])
-    service=SERVICES[index]
-
-    kb=InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="⭐ Заплатить 10",callback_data=f"pay_service_{index}")],
-        [InlineKeyboardButton(text="⬅ Назад",callback_data="services")]
-    ])
-
-    await call.message.edit_text(
-f"""🚘 Игровая услуга
-
-{service}
-
-Цена: ⭐10""",
-reply_markup=kb
-)
-
-# -------- PAYMENT --------
-
-@dp.callback_query(F.data.startswith("pay_service_"))
 async def buy_service(call:CallbackQuery):
 
-    index=int(call.data.split("_")[2])
+    index=int(call.data.split("_")[1])
     service=SERVICES[index]
 
     cursor.execute("""
@@ -320,32 +268,10 @@ datetime.now().strftime("%Y-%m-%d %H:%M")
 
     await state.clear()
 
-    kb=InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="⭐ Заплатить 1",callback_data=f"pay_question_{order_id}")],
-        [InlineKeyboardButton(text="⬅ Назад",callback_data="back")]
-    ])
-
-    await message.answer(
-f"""📦 Ваш вопрос
-
-{message.text}
-
-Цена ответа: ⭐1""",
-reply_markup=kb
-)
-
-@dp.callback_query(F.data.startswith("pay_question_"))
-async def pay_question(call:CallbackQuery):
-
-    order_id=int(call.data.split("_")[2])
-
-    cursor.execute("SELECT text FROM orders WHERE id=?",(order_id,))
-    q=cursor.fetchone()[0]
-
     await bot.send_invoice(
-        call.from_user.id,
+        message.from_user.id,
         title="Ответ на вопрос",
-        description=q,
+        description=message.text,
         payload=f"order_{order_id}",
         provider_token="",
         currency="XTR",
@@ -442,6 +368,10 @@ reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons)
 # VIEW ORDER
 # ============================================================
 
+# ============================================================
+# VIEW ORDER
+# ============================================================
+
 @dp.callback_query(F.data.startswith("order_"))
 async def view_order(call: CallbackQuery):
 
@@ -500,6 +430,7 @@ async def reply_start(call: CallbackQuery, state: FSMContext):
 
     await state.update_data(order_id=order_id)
 
+    # удаляем сообщение заказа
     try:
         await call.message.delete()
     except Exception:
@@ -537,6 +468,7 @@ async def reply_send(message: Message, state: FSMContext):
         ]
     )
 
+    # отправляем ответ клиенту
     await bot.send_message(
         user_id,
         f"""✉️ Ответ
@@ -545,6 +477,7 @@ async def reply_send(message: Message, state: FSMContext):
         reply_markup=kb
     )
 
+    # меняем статус заказа
     cursor.execute(
         "UPDATE orders SET status='done' WHERE id=?",
         (order_id,)
@@ -553,16 +486,19 @@ async def reply_send(message: Message, state: FSMContext):
 
     await state.clear()
 
+    # удаляем сообщение админа
     try:
         await message.delete()
     except Exception:
         pass
 
+    # удаляем сообщение "Напишите ответ"
     try:
         await bot.delete_message(ADMIN_ID, reply_msg)
     except Exception:
         pass
 
+    # показываем админ меню
     await bot.send_message(
         ADMIN_ID,
         "⚙️ Админ панель",
@@ -646,11 +582,9 @@ f"""📊 Статистика ({title})
 Заработано ⭐: {s}""",
         reply_markup=kb
     )
-
 @dp.callback_query(F.data=="none")
 async def none(call: CallbackQuery):
     await call.answer("Заказов нет")
-
 async def main():
     print("BOT STARTED")
     await dp.start_polling(bot)
