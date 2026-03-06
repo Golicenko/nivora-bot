@@ -121,38 +121,22 @@ def admin_menu():
 # ============================================================
 # START
 # ============================================================
-
 @dp.message(Command("start"))
 async def start(message: Message):
-
-    today = datetime.now().strftime("%Y-%m-%d")
-
-    cursor.execute("SELECT * FROM stats WHERE date=?", (today,))
-    row = cursor.fetchone()
-
-    if row:
-        cursor.execute(
-            "UPDATE stats SET starts = starts + 1 WHERE date=?",
-            (today,)
-        )
-    else:
-        cursor.execute(
-            "INSERT INTO stats VALUES(?,1)",
-            (today,)
-        )
-
-    db.commit()
 
     text = """👋 Добро пожаловать!
 
 Я помогу решить проблемы
 с Game Guardian и Virtual Space.
 
-Напишите ваш вопрос 👇
+ выберете вариант ниже 👇
 """
 
-    await message.answer(text, reply_markup=main_menu())
-    
+    await message.answer(
+        text,
+        reply_markup=main_menu()
+    )
+
 # ============================================================
 # BACK
 # ============================================================
@@ -641,6 +625,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
