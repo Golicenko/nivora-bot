@@ -121,6 +121,7 @@ def admin_menu():
 # ============================================================
 # START
 # ============================================================
+
 @dp.message(Command("start"))
 async def start(message: Message):
 
@@ -150,15 +151,20 @@ async def start(message: Message):
 Напишите ваш вопрос 👇
 """
 
-await message.answer(text, reply_markup=main_menu())
+    await message.answer(text, reply_markup=main_menu())
+    
 # ============================================================
 # BACK
 # ============================================================
-
 @dp.callback_query(F.data == "back")
 async def back(call: CallbackQuery):
-    await call.message.edit_text("🏠 Главное меню", reply_markup=main_menu())
 
+    await call.answer()
+
+    await call.message.edit_text(
+        "🏠 Главное меню",
+        reply_markup=main_menu()
+    )
 # ============================================================
 # POPULAR QUESTIONS
 # ============================================================
@@ -635,6 +641,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
