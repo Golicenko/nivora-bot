@@ -129,14 +129,13 @@ async def start(message: Message):
 Я помогу решить проблемы
 с Game Guardian и Virtual Space.
 
- выберете вариант ниже 👇
+Выберите пункт ниже 👇
 """
 
     await message.answer(
         text,
         reply_markup=main_menu()
     )
-
 # ============================================================
 # BACK
 # ============================================================
@@ -696,6 +695,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
