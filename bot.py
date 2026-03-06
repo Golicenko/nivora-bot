@@ -65,6 +65,7 @@ db.commit()
 
 class AskState(StatesGroup):
     waiting_question = State()
+    waiting_free = State()
 
 # ============================================================
 # DATA
@@ -136,15 +137,14 @@ async def start(message: Message):
 
     db.commit()
 
-    await message.answer(
+   await message.answer(
 """👋 Добро пожаловать!
 
 Я помогу решить проблемы
 с Game Guardian и Virtual Space.
 
-Выберите действие ниже 👇
-""",
-reply_markup=main_menu()
+Напишите ваш вопрос 👇
+"""
 )
 
 # ============================================================
@@ -323,50 +323,63 @@ async def receive_question(message: Message, state: FSMContext):
         cursor.execute("UPDATE users SET free_used=1 WHERE user_id=?", (user_id,))
         db.commit()
 
-        await message.answer("✅ Бесплатный вопрос отправлен!")
+await message.answer(
+    "✅ Бесплатный вопрос отправлен!",
+    reply_markup=main_menu()
+)
 
-        await bot.send_message(
-            ADMIN_ID,
-f"""🆓 Новый бесплатный вопрос
+await bot.send_message(
+    ADMIN_ID,
+    f"""📩 Новый бесплатный вопрос
 
 👤 {message.from_user.first_name}
 📄 {message.text}
 
 /admin"""
-        )
+)
 
-    await state.clear()
+await state.clear()
 
-# ============================================================
-# FREE QUESTION (FIXED)
-# ============================================================
+# =========================================
+# FREE QUESTION
+# =========================================
 
 @dp.callback_query(F.data == "free_question")
 async def free_question(call: CallbackQuery, state: FSMContext):
 
     user_id = call.from_user.id
 
-    cursor.execute("SELECT free_used FROM users WHERE user_id=?", (user_id,))
+    # проверяем есть ли пользователь
+    cursor.execute(
+        "SELECT free_used FROM users WHERE user_id = ?",
+        (user_id,)
+    )
     row = cursor.fetchone()
 
+    # если пользователь уже использовал бесплатный вопрос
     if row and row[0] == 1:
-        await call.answer("Вы уже использовали бесплатный вопрос", show_alert=True)
+        await call.answer(
+            "❌ Вы уже использовали бесплатный вопрос",
+            show_alert=True
+        )
         return
 
+    # если пользователя нет в базе
     if not row:
-        cursor.execute("INSERT INTO users VALUES(?,0)", (user_id,))
+        cursor.execute(
+            "INSERT INTO users (user_id, free_used) VALUES (?, 0)",
+            (user_id,)
+        )
         db.commit()
 
-    cursor.execute("UPDATE users SET free_used=1 WHERE user_id=?", (user_id,))
-    db.commit()
-
+    # сообщение пользователю
     await call.message.edit_text(
-"🆓 Напишите ваш бесплатный вопрос",
-reply_markup=back_menu()
-)
+        "✏️ Напишите ваш бесплатный вопрос:",
+        reply_markup=back_menu()
+    )
 
-    await state.set_state(AskState.waiting_question)
-
+    # устанавливаем состояние
+    await state.set_state(AskState.waiting_free)
 # ============================================================
 # PAYMENT
 # ============================================================
@@ -454,19 +467,28 @@ async def admin_new(call: CallbackQuery):
 @dp.callback_query(F.data == "admin_done")
 async def admin_done(call: CallbackQuery):
 
-    cursor.execute("SELECT name,text FROM orders WHERE status='done'")
-    orders = cursor.fetchall()
+    cursor.execute("SELECT COUNT(*) FROM orders WHERE status='done'")
+    total = cursor.fetchone()[0]
 
-    text = "✅ Выполненные заказы\n\n"
+    cursor.execute("SELECT date FROM orders WHERE status='done' ORDER BY id DESC LIMIT 1")
+    row = cursor.fetchone()
 
-    if not orders:
-        text += "Нет заказов"
-    else:
-        for o in orders:
-            text += f"{o[0]} — {o[1]}\n"
+    last = row[0] if row else "Нет"
 
-    await call.message.edit_text(text, reply_markup=admin_menu())
+    text = f"""📊 Выполненные заказы
 
+👇
+За все время
+{total} заказов
+
+Последний в {last}
+"""
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="admin_back")]
+    ])
+
+    await call.message.edit_text(text, reply_markup=kb)
 @dp.callback_query(F.data == "stats_menu")
 async def stats_menu(call: CallbackQuery):
 
@@ -555,6 +577,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
