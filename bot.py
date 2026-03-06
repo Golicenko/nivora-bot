@@ -131,13 +131,19 @@ async def start(message: Message):
     row = cursor.fetchone()
 
     if row:
-        cursor.execute("UPDATE stats SET starts = starts + 1 WHERE date=?", (today,))
+        cursor.execute(
+            "UPDATE stats SET starts = starts + 1 WHERE date=?",
+            (today,)
+        )
     else:
-        cursor.execute("INSERT INTO stats VALUES(?,1)", (today,))
+        cursor.execute(
+            "INSERT INTO stats VALUES(?,1)",
+            (today,)
+        )
 
     db.commit()
 
-   await message.answer(
+    await message.answer(
 """👋 Добро пожаловать!
 
 Я помогу решить проблемы
@@ -145,7 +151,7 @@ async def start(message: Message):
 
 Напишите ваш вопрос 👇
 """
-)
+    )
 
 # ============================================================
 # BACK
@@ -577,6 +583,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
