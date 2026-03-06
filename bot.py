@@ -256,7 +256,7 @@ VALUES(?,?,?,?,?,?,?,?)
         payload=f"order_{order_id}",
         provider_token="",
         currency="XTR",
-        prices=[LabeledPrice(label="Ответ", amount=1)],
+        prices=[LabeledPrice(label="Ответ", amount=100)],
         reply_markup=back_menu()
     )
 
@@ -310,7 +310,7 @@ VALUES(?,?,?,?,?,?,?,?)
         payload=f"order_{order_id}",
         provider_token="",
         currency="XTR",
-        prices=[LabeledPrice(label="Услуга", amount=10)],
+        prices=[LabeledPrice(label="Услуга", amount=1000)],
         reply_markup=back_menu()
     )
 
@@ -360,7 +360,7 @@ VALUES(?,?,?,?,?,?,?,?)
     order_id = cursor.lastrowid
     db.commit()
 
-    await message.delete()
+    # await message.delete()
 
     await bot.send_invoice(
         message.from_user.id,
@@ -746,3 +746,4 @@ if __name__ == "__main__":
 # ============================================================
 # END OF FILE
 # ============================================================
+
