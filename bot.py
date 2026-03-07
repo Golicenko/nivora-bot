@@ -104,8 +104,10 @@ def admin_menu():
 @dp.message(Command("start"))
 async def start(message: Message):
 
+    name = message.from_user.first_name
+
     await message.answer(
-"""Здравствуй, {neme}! 👋
+f"""Здравствуй, {name}! 👋
 
 Здесь ты можешь решить свои проблемы с Game Guardian
 или виртуальным пространством.
@@ -114,7 +116,7 @@ async def start(message: Message):
 """,
 reply_markup=main_menu()
 )
-
+    
 # ============================================================
 # BACK
 # ============================================================
@@ -609,6 +611,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
