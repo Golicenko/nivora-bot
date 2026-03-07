@@ -516,8 +516,10 @@ async def reply_send(message: Message, state: FSMContext):
 # ============================================================
 # DONE ORDERS
 # ============================================================
+@dp.callback_query(F.data=="admin_done")
+async def admin_done(call:CallbackQuery):
 
-cursor.execute(
+    cursor.execute(
 "SELECT COUNT(*) FROM orders WHERE status='done' AND date(date)=date('now')"
 )
 today = cursor.fetchone()[0]
@@ -540,7 +542,7 @@ f"""✅ Готовые заказы
 """,
 reply_markup=kb
 )
-
+ 
 # ============================================================
 # STATS
 # ============================================================
@@ -606,5 +608,6 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
