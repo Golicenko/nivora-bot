@@ -157,34 +157,46 @@ async def back(call: CallbackQuery):
 # ANALYTICS TODAY
 # ============================================================
 
-@dp.callback_query(F.data == "analytics_today")
-async def analytics_today(call: CallbackQuery):
+@dp.message(AskState.waiting_question)
+async def receive_question(message: Message, state: FSMContext):
 
-    cursor.execute(
-        "SELECT COUNT(*) FROM orders WHERE date(date)=date('now')"
+    if message.text.startswith("/"):
+        await state.clear()
+        await message.answer("🏠 Главное меню", reply_markup=main_menu())
+        return
+
+    if len(message.text) > 150:
+        await message.answer("❗ Максимум 150 символов")
+        return
+
+    cursor.execute("""
+    INSERT INTO orders(user_id,username,name,text,type,price,status,date)
+    VALUES(?,?,?,?,?,?,?,?)
+    """,(
+        message.from_user.id,
+        message.from_user.username,
+        message.from_user.first_name,
+        message.text,
+        "question",
+        1,
+        "waiting_payment",
+        datetime.now().strftime("%Y-%m-%d %H:%M")
+    ))
+
+    order_id = cursor.lastrowid
+    db.commit()
+
+    await state.clear()
+
+    await bot.send_invoice(
+        message.from_user.id,
+        title="Ответ на вопрос",
+        description=message.text,
+        payload=f"order_{order_id}",
+        provider_token="",
+        currency="XTR",
+        prices=[LabeledPrice(label="Ответ", amount=1)]
     )
-    orders = cursor.fetchone()[0]
-
-    cursor.execute(
-        "SELECT COUNT(*) FROM visits WHERE date(date)=date('now')"
-    )
-    visits = cursor.fetchone()[0]
-
-    kb = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(text="⬅ Назад", callback_data="analytics")]
-        ]
-    )
-
-    await call.message.edit_text(
-        f"""📊 Сегодня
-
-📦 Заказы: {orders}
-👥 Посещения: {visits}
-""",
-        reply_markup=kb
-    )
-
 # ============================================================
 # POPULAR QUESTIONS
 # ============================================================
@@ -676,6 +688,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
