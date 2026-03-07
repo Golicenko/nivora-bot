@@ -516,32 +516,33 @@ async def reply_send(message: Message, state: FSMContext):
 # ============================================================
 # DONE ORDERS
 # ============================================================
+
 @dp.callback_query(F.data=="admin_done")
-async def admin_done(call:CallbackQuery):
+async def admin_done(call: CallbackQuery):
 
     cursor.execute(
-"SELECT COUNT(*) FROM orders WHERE status='done' AND date(date)=date('now')"
-)
-today = cursor.fetchone()[0]
+    "SELECT COUNT(*) FROM orders WHERE status='done' AND date(date)=date('now')"
+    )
+    today = cursor.fetchone()[0]
 
-cursor.execute(
-"SELECT COUNT(*) FROM orders WHERE status='done'"
-)
-all_time = cursor.fetchone()[0]
+    cursor.execute(
+    "SELECT COUNT(*) FROM orders WHERE status='done'"
+    )
+    all_time = cursor.fetchone()[0]
 
-kb = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="⬅ Назад", callback_data="admin_back")]
-])
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="admin_back")]
+    ])
 
-await call.message.edit_text(
+    await call.message.edit_text(
 f"""✅ Готовые заказы
 
 Сделано сегодня: {today}
 
 Все время: {all_time}
 """,
-reply_markup=kb
-)
+        reply_markup=kb
+    )
  
 # ============================================================
 # STATS
@@ -608,6 +609,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
