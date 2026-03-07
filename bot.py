@@ -193,6 +193,36 @@ async def analytics_today(call: CallbackQuery):
 """,
         reply_markup=kb
     )
+
+# ====================================================
+# ANALYTICS ALL TIME
+# ====================================================
+
+@dp.callback_query(F.data == "analytics_all")
+async def analytics_all(call: CallbackQuery):
+
+    cursor.execute(
+        "SELECT COUNT(*) FROM orders"
+    )
+    orders = cursor.fetchone()[0]
+
+    cursor.execute(
+        "SELECT COUNT(*) FROM visits"
+    )
+    visits = cursor.fetchone()[0]
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="analytics")]
+    ])
+
+    await call.message.edit_text(
+        f"""📊 Все время
+
+📦 Заказы: {orders}
+👥 Посещения: {visits}
+""",
+        reply_markup=kb
+    )
 # ============================================================
 # POPULAR QUESTIONS
 # ============================================================
@@ -684,6 +714,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
