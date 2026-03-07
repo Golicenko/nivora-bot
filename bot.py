@@ -153,14 +153,20 @@ async def back(call: CallbackQuery):
         reply_markup=main_menu()
     )
 
-
 # ============================================================
 # ANALYTICS TODAY
 # ============================================================
+@dp.callback_query(F.data == "analytics")
+async def analytics(call: CallbackQuery):
+
+    await call.message.edit_text(
+        "📊 Аналитика",
+        reply_markup=analytics_menu()
+    )
 
 @dp.callback_query(F.data == "analytics_today")
 async def analytics_today(call: CallbackQuery):
-
+ 
     # заказы сегодня
     cursor.execute(
         "SELECT COUNT(*) FROM orders WHERE date(date)=date('now')"
@@ -315,32 +321,32 @@ async def ask(call:CallbackQuery,state:FSMContext):
     await state.set_state(AskState.waiting_question)
 
 @dp.message(AskState.waiting_question)
-async def receive_question(message:Message,state:FSMContext):
+async def receive_question(message: Message, state: FSMContext):
 
     if message.text.startswith("/"):
         await state.clear()
-await message.answer("🏠 Главное меню", reply_markup=main_menu())
-return
+        await message.answer("🏠 Главное меню", reply_markup=main_menu())
+        return
 
-    if len(message.text)>150:
+    if len(message.text) > 150:
         await message.answer("❗ Максимум 150 символов")
         return
 
     cursor.execute("""
-INSERT INTO orders(user_id,username,name,text,type,price,status,date)
-VALUES(?,?,?,?,?,?,?,?)
-""",(
-message.from_user.id,
-message.from_user.username,
-message.from_user.first_name,
-message.text,
-"question",
-1,
-"waiting_payment",
-datetime.now().strftime("%Y-%m-%d %H:%M")
-))
+    INSERT INTO orders(user_id,username,name,text,type,price,status,date)
+    VALUES(?,?,?,?,?,?,?,?)
+    """,(
+        message.from_user.id,
+        message.from_user.username,
+        message.from_user.first_name,
+        message.text,
+        "question",
+        1,
+        "waiting_payment",
+        datetime.now().strftime("%Y-%m-%d %H:%M")
+    ))
 
-    order_id=cursor.lastrowid
+    order_id = cursor.lastrowid
     db.commit()
 
     await state.clear()
@@ -352,7 +358,7 @@ datetime.now().strftime("%Y-%m-%d %H:%M")
         payload=f"order_{order_id}",
         provider_token="",
         currency="XTR",
-        prices=[LabeledPrice(label="Ответ",amount=1)]
+        prices=[LabeledPrice(label="Ответ", amount=1)]
     )
 
 # ============================================================
@@ -678,6 +684,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
