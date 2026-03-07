@@ -257,7 +257,8 @@ async def receive_question(message:Message,state:FSMContext):
 
     if message.text.startswith("/"):
         await state.clear()
-        return
+await message.answer("🏠 Главное меню", reply_markup=main_menu())
+return
 
     if len(message.text)>150:
         await message.answer("❗ Максимум 150 символов")
@@ -615,6 +616,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
