@@ -148,32 +148,36 @@ async def start(message: Message):
 
 @dp.callback_query(F.data == "back")
 async def back(call: CallbackQuery):
-
     await call.message.edit_text(
         "🏠 Главное меню",
         reply_markup=main_menu()
     )
 
+# ============================================================
+# ANALYTICS TODAY
+# ============================================================
 
-@dp.callback_query(F.data=="analytics_today")
-async def analytics_today(call:CallbackQuery):
+@dp.callback_query(F.data == "analytics_today")
+async def analytics_today(call: CallbackQuery):
 
     cursor.execute(
-    "SELECT COUNT(*) FROM orders WHERE date(date)=date('now')"
+        "SELECT COUNT(*) FROM orders WHERE date(date)=date('now')"
     )
     orders = cursor.fetchone()[0]
 
     cursor.execute(
-    "SELECT COUNT(*) FROM visits WHERE date(date)=date('now')"
+        "SELECT COUNT(*) FROM visits WHERE date(date)=date('now')"
     )
     visits = cursor.fetchone()[0]
 
-    kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="⬅ Назад", callback_data="analytics")]
-    ])
+    kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="⬅ Назад", callback_data="analytics")]
+        ]
+    )
 
     await call.message.edit_text(
-f"""📊 Сегодня
+        f"""📊 Сегодня
 
 📦 Заказы: {orders}
 👥 Посещения: {visits}
@@ -672,6 +676,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
