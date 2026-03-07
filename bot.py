@@ -43,6 +43,13 @@ status TEXT,
 date TEXT
 )
 """)
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS visits(
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+user_id INTEGER,
+date TEXT
+)
+""")
 
 db.commit()
 
@@ -90,13 +97,22 @@ def main_menu():
         [InlineKeyboardButton(text="🚘 Услуги в игре", callback_data="services")]
     ])
 
+
 def admin_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📥 Новые заказы", callback_data="admin_new")],
         [InlineKeyboardButton(text="✅ Готовые", callback_data="admin_done")],
-        [InlineKeyboardButton(text="📊 Статистика", callback_data="stats_menu")]
+        [InlineKeyboardButton(text="📊 Аналитика", callback_data="analytics")]
     ])
 
+
+def analytics_menu():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📅 Сегодня", callback_data="analytics_today")],
+        [InlineKeyboardButton(text="📊 Все время", callback_data="analytics_all")],
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="admin_back")]
+    ])
+    
 # ============================================================
 # START
 # ============================================================
@@ -105,6 +121,11 @@ def admin_menu():
 async def start(message: Message):
 
     name = message.from_user.first_name
+cursor.execute(
+"INSERT INTO visits(user_id,date) VALUES(?,?)",
+(message.from_user.id, datetime.now().strftime("%Y-%m-%d"))
+)
+db.commit()
 
     await message.answer(
 f"""Здравствуй, {name}! 👋
@@ -124,6 +145,32 @@ reply_markup=main_menu()
 @dp.callback_query(F.data=="back")
 async def back(call:CallbackQuery):
     await call.message.edit_text("🏠 Главное меню",reply_markup=main_menu())
+    
+    @dp.callback_query(F.data=="analytics_today")
+async def analytics_today(call:CallbackQuery):
+
+    cursor.execute(
+    "SELECT COUNT(*) FROM orders WHERE date(date)=date('now')"
+    )
+    orders = cursor.fetchone()[0]
+
+    cursor.execute(
+    "SELECT COUNT(*) FROM visits WHERE date(date)=date('now')"
+    )
+    visits = cursor.fetchone()[0]
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="analytics")]
+    ])
+
+    await call.message.edit_text(
+f"""📊 Сегодня
+
+📦 Заказы: {orders}
+👥 Посещения: {visits}
+""",
+        reply_markup=kb
+    )
 
 # ============================================================
 # POPULAR QUESTIONS
@@ -616,6 +663,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
