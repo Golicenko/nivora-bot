@@ -121,23 +121,26 @@ def analytics_menu():
 async def start(message: Message):
 
     name = message.from_user.first_name
-cursor.execute(
-"INSERT INTO visits(user_id,date) VALUES(?,?)",
-(message.from_user.id, datetime.now().strftime("%Y-%m-%d"))
-)
-db.commit()
 
-    await message.answer(
-f"""Здравствуй, {name}! 👋
+    # записываем посещение
+    cursor.execute(
+        "INSERT INTO visits(user_id,date) VALUES(?,?)",
+        (message.from_user.id, datetime.now().strftime("%Y-%m-%d"))
+    )
+    db.commit()
+
+    text = f"""Здравствуй, {name}! 👋
 
 Здесь ты можешь решить свои проблемы с Game Guardian
 или виртуальным пространством.
 
 Выбери подходящий вариант ниже 👇
-""",
-reply_markup=main_menu()
-)
-    
+"""
+
+    await message.answer(
+        text,
+        reply_markup=main_menu()
+    )
 # ============================================================
 # BACK
 # ============================================================
@@ -663,6 +666,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
