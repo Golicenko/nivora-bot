@@ -231,14 +231,21 @@ datetime.now().strftime("%Y-%m-%d %H:%M")
 @dp.callback_query(F.data=="ask")
 async def ask(call:CallbackQuery,state:FSMContext):
 
+    kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="⬅ Назад", callback_data="back")]
+        ]
+    )
+
     await call.message.edit_text(
 """Здравствуйте я Максим.
 
 Пожалуйста напишите свой вопрос максимально понятно
 чтобы мы могли ответить максимально подробно.
 
-Максимум 150 символов"""
-)
+Максимум 150 символов""",
+        reply_markup=kb
+    )
 
     await state.set_state(AskState.waiting_question)
 
@@ -591,3 +598,4 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
