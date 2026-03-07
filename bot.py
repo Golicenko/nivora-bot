@@ -255,6 +255,10 @@ async def ask(call:CallbackQuery,state:FSMContext):
 @dp.message(AskState.waiting_question)
 async def receive_question(message:Message,state:FSMContext):
 
+    if message.text.startswith("/"):
+        await state.clear()
+        return
+
     if len(message.text)>150:
         await message.answer("❗ Максимум 150 символов")
         return
@@ -611,6 +615,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
