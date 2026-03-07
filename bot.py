@@ -141,15 +141,21 @@ async def start(message: Message):
         text,
         reply_markup=main_menu()
     )
+
 # ============================================================
 # BACK
 # ============================================================
 
-@dp.callback_query(F.data=="back")
-async def back(call:CallbackQuery):
-    await call.message.edit_text("🏠 Главное меню",reply_markup=main_menu())
-    
-    @dp.callback_query(F.data=="analytics_today")
+@dp.callback_query(F.data == "back")
+async def back(call: CallbackQuery):
+
+    await call.message.edit_text(
+        "🏠 Главное меню",
+        reply_markup=main_menu()
+    )
+
+
+@dp.callback_query(F.data=="analytics_today")
 async def analytics_today(call:CallbackQuery):
 
     cursor.execute(
@@ -666,6 +672,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
