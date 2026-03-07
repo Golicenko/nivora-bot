@@ -29,6 +29,7 @@ dp = Dispatcher(storage=MemoryStorage())
 db = sqlite3.connect("bot.db", check_same_thread=False)
 cursor = db.cursor()
 
+cursor.execute("DROP TABLE IF EXISTS orders")
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS orders(
 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -104,7 +105,7 @@ def admin_menu():
 async def start(message: Message):
 
     await message.answer(
-"""Здравствуй, юзер! 👋
+"""Здравствуй, {neme}! 👋
 
 Здесь ты можешь решить свои проблемы с Game Guardian
 или виртуальным пространством.
@@ -516,22 +517,29 @@ async def reply_send(message: Message, state: FSMContext):
 # DONE ORDERS
 # ============================================================
 
-@dp.callback_query(F.data=="admin_done")
-async def admin_done(call:CallbackQuery):
+cursor.execute(
+"SELECT COUNT(*) FROM orders WHERE status='done' AND date(date)=date('now')"
+)
+today = cursor.fetchone()[0]
 
-    cursor.execute("SELECT * FROM orders WHERE status='done'")
-    orders=cursor.fetchall()
+cursor.execute(
+"SELECT COUNT(*) FROM orders WHERE status='done'"
+)
+all_time = cursor.fetchone()[0]
 
-    text="✅ Готовые заказы\n\n"
+kb = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="⬅ Назад", callback_data="admin_back")]
+])
 
-    if not orders:
-        text+="Заказов нет"
+await call.message.edit_text(
+f"""✅ Готовые заказы
 
-    else:
-        for o in orders:
-            text+=f"{o[3]} | {o[8]}\n"
+Сделано сегодня: {today}
 
-    await call.message.edit_text(text,reply_markup=admin_menu())
+Все время: {all_time}
+""",
+reply_markup=kb
+)
 
 # ============================================================
 # STATS
@@ -598,4 +606,5 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
