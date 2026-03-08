@@ -549,17 +549,17 @@ async def reply_start(call: CallbackQuery, state: FSMContext):
 
     order_id = call.data.split("_")[1]
 
-    await state.update_data(order_id=order_id)
+    await state.update_data(order_id=order_id, order_msg_id=call.message.message_id)
 
     # удаляем сообщение заказа
     try:
         await call.message.delete()
-    except Exception:
+    except:
         pass
 
     msg = await bot.send_message(
         ADMIN_ID,
-        "✍ Напишите ответ"
+        "✍️ Напишите ответ"
     )
 
     await state.update_data(reply_msg=msg.message_id)
@@ -571,10 +571,16 @@ async def reply_start(call: CallbackQuery, state: FSMContext):
 async def reply_send(message: Message, state: FSMContext):
 
     data = await state.get_data()
+
     order_id = data["order_id"]
     reply_msg = data["reply_msg"]
+    order_msg_id = data["order_msg_id"]
 
-    cursor.execute("SELECT user_id FROM orders WHERE id=?", (order_id,))
+    cursor.execute(
+        "SELECT user_id FROM orders WHERE id=?",
+        (order_id,)
+    )
+
     row = cursor.fetchone()
 
     if not row:
@@ -592,9 +598,7 @@ async def reply_send(message: Message, state: FSMContext):
     # отправляем ответ клиенту
     await bot.send_message(
         user_id,
-        f"""✉️ Ответ
-
-{message.text}""",
+        f"📩 Ответ\n\n{message.text}",
         reply_markup=kb
     )
 
@@ -603,28 +607,35 @@ async def reply_send(message: Message, state: FSMContext):
         "UPDATE orders SET status='done' WHERE id=?",
         (order_id,)
     )
+
     db.commit()
 
     await state.clear()
 
-# удаляем сообщение с ответом админа
-try:
-    await message.delete()
-except Exception:
-    pass
+    # удаляем сообщение с ответом админа
+    try:
+        await message.delete()
+    except:
+        pass
 
-# удаляем сообщение "Напишите ответ"
-try:
-    await bot.delete_message(ADMIN_ID, reply_msg)
-except Exception:
-    pass
+    # удаляем "Напишите ответ"
+    try:
+        await bot.delete_message(ADMIN_ID, reply_msg)
+    except:
+        pass
 
-# показываем админ меню
-await bot.send_message(
-    ADMIN_ID,
-    "⚙️ Админ панель",
-    reply_markup=admin_menu()
-)
+    # удаляем сообщение старого заказа
+    try:
+        await bot.delete_message(ADMIN_ID, order_msg_id)
+    except:
+        pass
+
+    # показываем админ меню
+    await bot.send_message(
+        ADMIN_ID,
+        "⚙️ Админ панель",
+        reply_markup=admin_menu()
+    )
 
 # ============================================================
 # DONE ORDERS
@@ -722,6 +733,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
