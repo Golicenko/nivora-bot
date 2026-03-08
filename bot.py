@@ -607,29 +607,22 @@ async def reply_send(message: Message, state: FSMContext):
 
     await state.clear()
 
-# удаляем сообщение админа
+# удаляем сообщение с ответом админа
 try:
     await message.delete()
 except Exception:
-    pass    
+    pass
 
-    # удаляем сообщение админа
-    try:
-        await message.delete()
-    except Exception:
-        pass
+# удаляем сообщение "Напишите ответ"
+try:
+    await bot.delete_message(ADMIN_ID, reply_msg)
+except Exception:
+    pass
 
-    # удаляем сообщение "Напишите ответ"
-    try:
-        await bot.delete_message(ADMIN_ID, reply_msg)
-    except Exception:
-        pass
-
-    # показываем админ меню
-
-    await bot.send_message(
+# показываем админ меню
+await bot.send_message(
     ADMIN_ID,
-    "📥 Новые заказы",
+    "⚙️ Админ панель",
     reply_markup=admin_menu()
 )
 
@@ -729,6 +722,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
