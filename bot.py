@@ -554,12 +554,6 @@ async def reply_start(call: CallbackQuery, state: FSMContext):
         order_msg_id=call.message.message_id
     )
 
-    # удаляем сообщение заказа
-    try:
-        await call.message.delete()
-    except Exception:
-        pass
-
     msg = await bot.send_message(
         ADMIN_ID,
         "✍️ Напишите ответ"
@@ -575,9 +569,9 @@ async def reply_send(message: Message, state: FSMContext):
 
     data = await state.get_data()
 
-    order_id = data["order_id"]
-    reply_msg = data["reply_msg"]
-    order_msg_id = data["order_msg_id"]
+    order_id = data.get("order_id")
+    reply_msg = data.get("reply_msg")
+    order_msg_id = data.get("order_msg_id")
 
     cursor.execute(
         "SELECT user_id FROM orders WHERE id=?",
@@ -615,25 +609,25 @@ async def reply_send(message: Message, state: FSMContext):
 
     await state.clear()
 
-    # удаляем сообщение с ответом админа
+    # удаляем сообщение админа
     try:
         await message.delete()
-    except Exception:
+    except:
         pass
 
-    # удаляем сообщение "Напишите ответ"
+    # удаляем "Напишите ответ"
     try:
         await bot.delete_message(ADMIN_ID, reply_msg)
-    except Exception:
+    except:
         pass
 
-    # удаляем сообщение старого заказа
+    # удаляем сообщение заказа
     try:
         await bot.delete_message(ADMIN_ID, order_msg_id)
-    except Exception:
+    except:
         pass
 
-    # показываем админ меню
+    # админ меню
     await bot.send_message(
         ADMIN_ID,
         "⚙️ Админ панель",
@@ -735,6 +729,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
