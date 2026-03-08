@@ -549,12 +549,15 @@ async def reply_start(call: CallbackQuery, state: FSMContext):
 
     order_id = call.data.split("_")[1]
 
-    await state.update_data(order_id=order_id, order_msg_id=call.message.message_id)
+    await state.update_data(
+        order_id=order_id,
+        order_msg_id=call.message.message_id
+    )
 
     # удаляем сообщение заказа
     try:
         await call.message.delete()
-    except:
+    except Exception:
         pass
 
     msg = await bot.send_message(
@@ -615,19 +618,19 @@ async def reply_send(message: Message, state: FSMContext):
     # удаляем сообщение с ответом админа
     try:
         await message.delete()
-    except:
+    except Exception:
         pass
 
-    # удаляем "Напишите ответ"
+    # удаляем сообщение "Напишите ответ"
     try:
         await bot.delete_message(ADMIN_ID, reply_msg)
-    except:
+    except Exception:
         pass
 
     # удаляем сообщение старого заказа
     try:
         await bot.delete_message(ADMIN_ID, order_msg_id)
-    except:
+    except Exception:
         pass
 
     # показываем админ меню
@@ -636,7 +639,6 @@ async def reply_send(message: Message, state: FSMContext):
         "⚙️ Админ панель",
         reply_markup=admin_menu()
     )
-
 # ============================================================
 # DONE ORDERS
 # ============================================================
@@ -733,6 +735,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
