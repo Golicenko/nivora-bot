@@ -395,21 +395,31 @@ async def receive_question(message: Message, state: FSMContext):
 # ============================================================
 
 @dp.pre_checkout_query()
-async def checkout(pre_checkout_query:PreCheckoutQuery):
-    await bot.answer_pre_checkout_query(pre_checkout_query.id,ok=True)
+async def checkout(pre_checkout_query: PreCheckoutQuery):
+    await bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)
+
 
 @dp.message(F.successful_payment)
-async def payment(message:Message):
+async def payment(message: Message):
 
-    payload=message.successful_payment.invoice_payload
-    order_id=int(payload.split("_")[1])
+    payload = message.successful_payment.invoice_payload
+    order_id = int(payload.split("_")[1])
 
-    cursor.execute("UPDATE orders SET status='new' WHERE id=?",(order_id,))
+    # меняем статус заказа
+    cursor.execute(
+        "UPDATE orders SET status='new' WHERE id=?",
+        (order_id,)
+    )
     db.commit()
 
-    cursor.execute("SELECT * FROM orders WHERE id=?",(order_id,))
-    o=cursor.fetchone()
+    # получаем заказ
+    cursor.execute(
+        "SELECT * FROM orders WHERE id=?",
+        (order_id,)
+    )
+    o = cursor.fetchone()
 
+    # чек пользователю
     await message.answer(
 f"""🧾 Чек
 
@@ -419,18 +429,20 @@ f"""🧾 Чек
 📅 {o[8]}
 
 ✅ Оплата прошла успешно"""
-)
+    )
 
+    # сообщение админу
     msg = await bot.send_message(
         ADMIN_ID,
 f"""📥 Новый заказ
 
 👤 {o[3]}
+📝 {o[4]}
 ⏰ {o[8]}
 
 /admin"""
-)
-
+    )
+    
 await dp.storage.update_data(
     bot=bot,
     chat=ADMIN_ID,
@@ -734,6 +746,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
