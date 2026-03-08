@@ -207,7 +207,7 @@ async def analytics_all(call: CallbackQuery):
     orders = cursor.fetchone()[0]
 
     cursor.execute(
-        "SELECT COUNT(*) FROM orders"
+        "SELECT COUNT(*) FROM visits"
     )
     visits = cursor.fetchone()[0]
 
@@ -437,12 +437,20 @@ f"""📥 Новый заказ
 # ============================================================
 
 @dp.message(Command("admin"))
-async def admin(message:Message):
+async def admin(message: Message):
 
-    if message.from_user.id!=ADMIN_ID:
+    if message.from_user.id != ADMIN_ID:
         return
 
-    await message.answer("⚙️ Админ панель",reply_markup=admin_menu())
+    try:
+        await message.delete()
+    except:
+        pass
+
+    await message.answer(
+        "⚙️ Админ панель",
+        reply_markup=admin_menu()
+    )
 
 # ============================================================
 # NEW ORDERS
@@ -612,11 +620,12 @@ async def reply_send(message: Message, state: FSMContext):
         pass
 
     # показываем админ меню
+
     await bot.send_message(
-        ADMIN_ID,
-        "⚙️ Админ панель",
-        reply_markup=admin_menu()
-    )
+    ADMIN_ID,
+    "📥 Новые заказы",
+    reply_markup=admin_menu()
+)
 
 # ============================================================
 # DONE ORDERS
@@ -714,6 +723,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
