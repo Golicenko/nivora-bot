@@ -605,7 +605,7 @@ async def reply_send(message: Message, state: FSMContext):
     )
     db.commit()
 
-await state.clear()
+    await state.clear()
 
 # удаляем сообщение с ответом админа
 try:
@@ -722,6 +722,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
