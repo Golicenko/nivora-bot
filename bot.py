@@ -419,7 +419,7 @@ async def payment(message: Message):
     )
     o = cursor.fetchone()
 
-    # чек пользователю
+    # отправляем чек пользователю
     await message.answer(
 f"""🧾 Чек
 
@@ -431,8 +431,8 @@ f"""🧾 Чек
 ✅ Оплата прошла успешно"""
     )
 
-    # сообщение админу
-    msg = await bot.send_message(
+    # отправляем заказ админу
+    await bot.send_message(
         ADMIN_ID,
 f"""📥 Новый заказ
 
@@ -442,13 +442,6 @@ f"""📥 Новый заказ
 
 /admin"""
     )
-    
-await dp.storage.update_data(
-    bot=bot,
-    chat=ADMIN_ID,
-    data={"order_msg_id": msg.message_id}
-)
-
 # ============================================================
 # ADMIN PANEL
 # ============================================================
@@ -746,6 +739,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
