@@ -29,7 +29,6 @@ dp = Dispatcher(storage=MemoryStorage())
 db = sqlite3.connect("bot.db", check_same_thread=False)
 cursor = db.cursor()
 
-cursor.execute("DROP TABLE IF EXISTS orders")
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS orders(
 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -422,7 +421,7 @@ f"""🧾 Чек
 ✅ Оплата прошла успешно"""
 )
 
-    await bot.send_message(
+    msg = await bot.send_message(
         ADMIN_ID,
 f"""📥 Новый заказ
 
@@ -430,6 +429,12 @@ f"""📥 Новый заказ
 ⏰ {o[8]}
 
 /admin"""
+)
+
+await dp.storage.update_data(
+    bot=bot,
+    chat=ADMIN_ID,
+    data={"order_msg_id": msg.message_id}
 )
 
 # ============================================================
@@ -729,6 +734,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
