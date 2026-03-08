@@ -607,11 +607,11 @@ async def reply_send(message: Message, state: FSMContext):
 
     await state.clear()
 
-    # удаляем сообщение заказа
+# удаляем сообщение админа
 try:
-    await bot.delete_message(ADMIN_ID, message.message_id-1)
-except:
-    pass
+    await message.delete()
+except Exception:
+    pass    
 
     # удаляем сообщение админа
     try:
@@ -729,6 +729,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
