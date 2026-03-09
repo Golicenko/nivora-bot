@@ -513,15 +513,16 @@ async def broadcast_send(message: Message, state: FSMContext):
 
         await asyncio.sleep(0.05)
 
-    await message.answer(
-        f"""✅ Рассылка завершена
+    result = await message.answer(
+f"✅ Рассылка завершена\n\nОтправлено: {sent}\nОшибка: {failed}"
+)
 
-Отправлено: {sent}
-Ошибка: {failed}
-"""
-    )
+try:
+await message.delete()
+except:
+pass
 
-    await state.clear()
+await state.clear()
     
 # ============================================================
 # NEW ORDERS
@@ -800,6 +801,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
