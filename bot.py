@@ -62,6 +62,9 @@ class AskState(StatesGroup):
 class ReplyState(StatesGroup):
     waiting_reply = State()
 
+class BroadcastState(StatesGroup):
+    waiting_text = State()
+    
 # ============================================================
 # DATA
 # ============================================================
@@ -463,6 +466,64 @@ async def admin(message: Message):
     )
 
 # ============================================================
+# BROADCAST
+# ============================================================
+
+@dp.message(Command("broadcast"))
+async def broadcast_start(message: Message, state: FSMContext):
+
+    if message.from_user.id != ADMIN_ID:
+        return
+
+    await message.answer(
+        "📢 Напишите сообщение для рассылки"
+    )
+
+    await state.set_state(BroadcastState.waiting_text)
+
+
+@dp.message(BroadcastState.waiting_text)
+async def broadcast_send(message: Message, state: FSMContext):
+
+    if message.from_user.id != ADMIN_ID:
+        return
+
+    text = message.text
+
+    cursor.execute(
+        "SELECT DISTINCT user_id FROM visits"
+    )
+
+    users = cursor.fetchall()
+
+    sent = 0
+    failed = 0
+
+    for user in users:
+
+        try:
+            await bot.send_message(
+                user[0],
+                f"📢 Обновление бота\n\n{text}"
+            )
+            sent += 1
+
+        except:
+            failed += 1
+
+        await asyncio.sleep(0.05)
+
+    await message.answer(
+        f"""✅ Рассылка завершена
+
+Отправлено: {sent}
+Ошибка: {failed}
+"""
+    )
+
+    await state.clear()
+    
+# ============================================================
 # NEW ORDERS
 # ============================================================
 
@@ -739,6 +800,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
