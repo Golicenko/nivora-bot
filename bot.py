@@ -273,7 +273,7 @@ async def set_next(call: CallbackQuery):
         reply_markup=kb
     )
 
-
+    
 # =====================================================
 # PREVIOUS SET
 # =====================================================
@@ -362,7 +362,21 @@ async def back_menu(call: CallbackQuery):
         pass
 
     await call.answer()
-    
+
+# ============================================================
+# BACK TO MAIN MENU
+# ============================================================
+
+@dp.callback_query(F.data == "back_menu")
+async def back_menu(callback: CallbackQuery):
+
+    await callback.message.delete()
+
+    await callback.message.answer(
+        "Выбери действие 👇",
+        reply_markup=main_menu()
+    )
+
 # ============================================================
 # START
 # ============================================================
@@ -1250,6 +1264,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
