@@ -381,15 +381,63 @@ async def start(message: Message):
 
     text = f"""Здравствуй, {name}! 👋
 
-Здесь ты можешь решить свои проблемы с Game Guardian
-или виртуальным пространством.
+Если ты совершаешь покупку первый раз в нашем боте,
+рекомендуем ознакомиться с информацией ниже.
 
-Выбери подходящий вариант ниже 👇
+Мы подготовили несколько страниц с важной информацией:
+
+🔎 Почему нам можно доверять  
+🔒 Гарантии безопасности  
+🛒 Как проходит покупка  
+🌐 Наши официальные каналы  
+
+После ознакомления ты можешь перейти в основное меню бота.
 """
+
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+
+            [
+                InlineKeyboardButton(
+                    text="🔎 Почему нам можно доверять",
+                    url="https://golicenko.github.io/nivora-bot/trust.html"
+                )
+            ],
+
+            [
+                InlineKeyboardButton(
+                    text="🔒 Гарантии безопасности",
+                    url="https://golicenko.github.io/nivora-bot/security.html"
+                )
+            ],
+
+            [
+                InlineKeyboardButton(
+                    text="🛒 Как проходит покупка",
+                    url="https://golicenko.github.io/nivora-bot/purchase.html"
+                )
+            ],
+
+            [
+                InlineKeyboardButton(
+                    text="🌐 Наши официальные каналы",
+                    url="https://golicenko.github.io/nivora-bot/channels.html"
+                )
+            ],
+
+            [
+                InlineKeyboardButton(
+                    text="🚀 Перейти в меню бота",
+                    callback_data="back_menu"
+                )
+            ]
+
+        ]
+    )
 
     await message.answer(
         text,
-        reply_markup=main_menu()
+        reply_markup=keyboard
     )
 
 # ============================================================
@@ -1202,6 +1250,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
