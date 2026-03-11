@@ -415,14 +415,12 @@ async def payment(message: Message):
 
     payload = message.successful_payment.invoice_payload
 
-    # Получаем ID заказа
     try:
         order_id = int(payload.split("_")[-1])
     except:
         await message.answer("❗ Ошибка обработки платежа.")
         return
 
-    # Получаем заказ
     cursor.execute(
         "SELECT * FROM orders WHERE id=?",
         (order_id,)
@@ -433,27 +431,25 @@ async def payment(message: Message):
         await message.answer("❗ Заказ не найден. Напишите администратору.")
         return
 
-    # Обновляем статус
     cursor.execute(
         "UPDATE orders SET status='new' WHERE id=?",
         (order_id,)
     )
     db.commit()
 
-    # Имя пользователя
     username = message.from_user.username
     buyer = f"@{username}" if username else message.from_user.full_name
 
-    service_name = order[4]
+    service = order[4]
     price = order[6]
     date = order[8]
 
-    # Отправляем чек
+    # ЧЕК
     await message.answer(
 f"""🧾 ЧЕК ОБ ОПЛАТЕ
 
 📦 Услуга:
-{service_name}
+{service}
 
 ⭐ Стоимость:
 {price} Telegram Stars
@@ -470,27 +466,50 @@ f"""🧾 ЧЕК ОБ ОПЛАТЕ
 
 📩 Администратор уже получил ваш заказ.
 Ожидайте выполнения услуги."""
+)
+
+    # КНОПКА ПРИНЯТЬ
+    kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="✅ Принять", callback_data=f"take_{order_id}")]
+        ]
     )
 
-    # Отправляем заказ админу
+    # ЗАКАЗ АДМИНУ
     await bot.send_message(
         ADMIN_ID,
 f"""📥 Новый заказ
 
 👤 {buyer}
-📦 {service_name}
+📦 {service}
 ⭐ {price} Stars
-⏰ {date}
-
-/admin"""
+⏰ {date}""",
+reply_markup=kb
     )
 
-    # Пытаемся очистить чат
-    try:
-        await message.delete()
-    except:
-        pass
-        
+# ============================================================
+# TAKE ORDER
+# ============================================================
+
+@dp.callback_query(F.data.startswith("take_"))
+async def take_order(call: CallbackQuery):
+
+    order_id = int(call.data.split("_")[1])
+
+    cursor.execute(
+        "UPDATE orders SET status='work' WHERE id=?",
+        (order_id,)
+    )
+    db.commit()
+
+    await call.message.delete()
+
+    await call.message.answer(
+        f"🛠 Заказ #{order_id} принят в работу"
+    )
+
+    await call.answer()
+    
 # ============================================================
 # ADMIN PANEL
 # ============================================================
@@ -847,6 +866,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
