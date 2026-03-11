@@ -337,7 +337,7 @@ async def buy_set(call: CallbackQuery):
         price
     )
 
-    prices = [LabeledPrice(label=name, amount=amount)]
+    prices = [LabeledPrice(label=name, amount=price)]
 
     await bot.send_invoice(
         call.from_user.id,
@@ -348,7 +348,6 @@ async def buy_set(call: CallbackQuery):
         currency="XTR",
         prices=prices
     )
-
 
 # =====================================================
 # BACK MENU
@@ -1203,6 +1202,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
