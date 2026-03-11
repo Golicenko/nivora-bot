@@ -506,6 +506,25 @@ async def take_order(call: CallbackQuery):
     await call.message.delete()
 
     await call.answer("Заказ принят")
+
+# ============================================================
+# BACK TO MENU
+# ============================================================
+
+@dp.callback_query(F.data == "back_menu")
+async def back_menu(call: CallbackQuery):
+
+    try:
+        await call.message.delete()
+    except:
+        pass
+
+    await call.message.answer(
+        "🏠 Главное меню",
+        reply_markup=main_menu
+    )
+
+    await call.answer()
     
 # ============================================================
 # ADMIN PANEL
@@ -727,11 +746,11 @@ async def reply_send(message: Message, state: FSMContext):
     )
 
     # отправляем ответ клиенту
-    await bot.send_message(
-        user_id,
-        f"📩 Ответ\n\n{message.text}",
-        reply_markup=kb
-    )
+msg = await bot.send_message(
+    user_id,
+    f"📩 Ответ\n\n{message.text}",
+    reply_markup=kb
+)
 
     # меняем статус заказа
     cursor.execute(
@@ -863,6 +882,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
