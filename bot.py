@@ -184,7 +184,7 @@ def main_menu():
         [InlineKeyboardButton(text="🤩 Популярные вопросы", callback_data="popular")],
         [InlineKeyboardButton(text="✍️ Написать свой вопрос", callback_data="ask")],
         [InlineKeyboardButton(text="🚘 Услуги в игре", callback_data="services")],
-        [InlineKeyboardButton(text="🎁 Наборы Car Parking", callback_data="sets")]
+        [InlineKeyboardButton(text="🎁 Наборы Услуг", callback_data="sets")]
     ])
 
 
@@ -670,7 +670,7 @@ async def receive_question(message: Message, state: FSMContext):
 
     if message.text.startswith("/"):
         await state.clear()
-        await message.answer("🏠 Главное меню", reply_markup=main_menu())
+        await message.answer("🏠 Главное меню\n\nВыберите нужный раздел ниже или задайте вопрос", reply_markup=menu)
         return
 
     if len(message.text) > 150:
@@ -1202,6 +1202,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
