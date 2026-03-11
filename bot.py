@@ -105,6 +105,7 @@ def main_menu():
         [InlineKeyboardButton(text="🤩 Популярные вопросы", callback_data="popular")],
         [InlineKeyboardButton(text="✍️ Написать свой вопрос", callback_data="ask")],
         [InlineKeyboardButton(text="🚘 Услуги в игре", callback_data="services")]
+        [InlineKeyboardButton(text="🎁 Наборы Car Parking", callback_data="sets")]
     ])
 
 
@@ -122,7 +123,131 @@ def analytics_menu():
         [InlineKeyboardButton(text="📊 Все время", callback_data="analytics_all")],
         [InlineKeyboardButton(text="⬅ Назад", callback_data="admin_back")]
     ])
-    
+
+# =====================================================
+# SETS START
+# =====================================================
+
+@dp.callback_query(F.data == "sets")
+async def sets_start(call: CallbackQuery):
+
+    index = 0
+    s = SETS[index]
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+
+        [InlineKeyboardButton(text="➡ Далее", callback_data="set_next_0")],
+
+        [InlineKeyboardButton(text="💳 Купить", callback_data="buy_set_0")],
+
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu")]
+
+    ])
+
+    photo = FSInputFile(s["photo"])
+
+    await call.message.answer_photo(
+        photo,
+        caption=s["text"],
+        reply_markup=kb
+    )
+
+@dp.callback_query(F.data.startswith("set_next_"))
+async def set_next(call: CallbackQuery):
+
+    index = int(call.data.split("_")[2]) + 1
+
+    if index >= len(SETS):
+        index = 0
+
+    s = SETS[index]
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+
+        [
+        InlineKeyboardButton(text="⬅ Назад", callback_data=f"set_prev_{index}"),
+        InlineKeyboardButton(text="➡ Далее", callback_data=f"set_next_{index}")
+        ],
+
+        [InlineKeyboardButton(text="💳 Купить", callback_data=f"buy_set_{index}")],
+
+        [InlineKeyboardButton(text="🏠 Меню", callback_data="back_menu")]
+
+    ])
+
+    photo = FSInputFile(s["photo"])
+
+    await call.message.delete()
+
+    await call.message.answer_photo(
+        photo,
+        caption=s["text"],
+        reply_markup=kb
+    )
+
+@dp.callback_query(F.data.startswith("set_prev_"))
+async def set_prev(call: CallbackQuery):
+
+    index = int(call.data.split("_")[2]) - 1
+
+    if index < 0:
+        index = len(SETS) - 1
+
+    s = SETS[index]
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+
+        [
+        InlineKeyboardButton(text="⬅ Назад", callback_data=f"set_prev_{index}"),
+        InlineKeyboardButton(text="➡ Далее", callback_data=f"set_next_{index}")
+        ],
+
+        [InlineKeyboardButton(text="💳 Купить", callback_data=f"buy_set_{index}")],
+
+        [InlineKeyboardButton(text="🏠 Меню", callback_data="back_menu")]
+
+    ])
+
+    photo = FSInputFile(s["photo"])
+
+    await call.message.delete()
+
+    await call.message.answer_photo(
+        photo,
+        caption=s["text"],
+        reply_markup=kb
+    )
+
+@dp.callback_query(F.data.startswith("buy_set_"))
+async def buy_set(call: CallbackQuery):
+
+    index = int(call.data.split("_")[2])
+
+    s = SETS[index]
+
+    name = s["name"]
+    price = s["price"]
+
+    order_id = create_order(
+        call.from_user.id,
+        call.from_user.username,
+        call.from_user.first_name,
+        name,
+        "set",
+        price
+    )
+
+    prices = [LabeledPrice(label=name, amount=price)]
+
+    await bot.send_invoice(
+        call.from_user.id,
+        title=name,
+        description="Покупка набора",
+        payload=f"order_{order_id}",
+        provider_token="",
+        currency="XTR",
+        prices=prices
+    )
 # ============================================================
 # START
 # ============================================================
@@ -335,6 +460,71 @@ currency="XTR",
 prices=[LabeledPrice(label=service, amount=10)]
 )
 
+# =====================================================
+# CAR PARKING SETS
+# =====================================================
+
+SETS = [
+
+{
+"name": "🥉 Стартовый набор",
+"photo": "standard.jpg",
+"text": """🥉 Набор №1 — Стартовый
+
+Что входит:
+
+💰 Вирты — 50.000.000
+🪙 Коины — 10.000
+⚙️ Чит силы 300 / 414 / 800 / 1695
+
+⭐ Цена: 20 Telegram Stars
+""",
+"price": 20
+},
+
+{
+"name": "🥈 Продвинутый набор",
+"photo": "pro.jpg",
+"text": """🥈 Набор №2 — Продвинутый
+
+Что входит:
+
+💰 Вирты — 50.000.000
+🪙 Коины — 30.000
+💪 Силы — 300 / 414 / 800 / 1625
+🚗 Чит машина
+🏠 Дом 3
+
+⭐ Цена: 35 Telegram Stars
+""",
+"price": 35
+},
+
+{
+"name": "🥇 Полный набор",
+"photo": "vip.jpg",
+"text": """🥇 Набор №3 — Полный
+
+Что входит:
+
+💰 Вирты — 50.000.000
+🪙 Коины — 30.000
+💪 Силы — 300 / 414 / 800 / 1625
+🏎 Донатный W16
+🚗 Чит машина
+⚙️ Настройка трансмиссии
+✨ Хром машина
+🧰 Боди кит (ваш выбор)
+⚖️ Изменение массы машины
+🏠 Открыть 3 дом
+⛽ Бесконечное топливо
+
+⭐ Цена: 50 Telegram Stars
+""",
+"price": 50
+}
+
+]
 # ============================================================
 # ASK QUESTION
 # ============================================================
@@ -883,6 +1073,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
