@@ -349,20 +349,6 @@ async def buy_set(call: CallbackQuery):
         prices=prices
     )
 
-# =====================================================
-# BACK MENU
-# =====================================================
-
-@dp.callback_query(F.data == "back_menu")
-async def back_menu(call: CallbackQuery):
-
-    try:
-        await call.message.delete()
-    except:
-        pass
-
-    await call.answer()
-
 # ============================================================
 # BACK TO MAIN MENU
 # ============================================================
@@ -1264,6 +1250,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
