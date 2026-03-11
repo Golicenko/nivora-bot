@@ -465,9 +465,13 @@ async def admin(message: Message):
         reply_markup=admin_menu()
     )
 
-# ============================================================
+# ============================
 # BROADCAST
-# ============================================================
+# ============================
+
+class BroadcastState(StatesGroup):
+    waiting_text = State()
+
 
 @dp.message(Command("broadcast"))
 async def broadcast_start(message: Message, state: FSMContext):
@@ -513,15 +517,13 @@ async def broadcast_send(message: Message, state: FSMContext):
 
         await asyncio.sleep(0.05)
 
-    result = await message.answer(
-f"✅ Рассылка завершена\n\nОтправлено: {sent}\nОшибка: {failed}"
-)
+    await message.answer(
+        f"✅ Рассылка завершена\n\n"
+        f"Отправлено: {sent}\n"
+        f"Ошибка: {failed}"
+    )
 
-try:
-    await message.delete()
-except:
-    pass
-    
+    await state.clear()
 # ============================================================
 # NEW ORDERS
 # ============================================================
@@ -799,6 +801,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
