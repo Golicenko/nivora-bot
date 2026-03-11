@@ -414,38 +414,55 @@ async def checkout(pre_checkout_query: PreCheckoutQuery):
 async def payment(message: Message):
 
     payload = message.successful_payment.invoice_payload
-    order_id = int(payload.split("_")[-1])
 
+    # Получаем ID заказа
+    try:
+        order_id = int(payload.split("_")[-1])
+    except:
+        await message.answer("❗ Ошибка обработки платежа.")
+        return
+
+    # Получаем заказ
+    cursor.execute(
+        "SELECT * FROM orders WHERE id=?",
+        (order_id,)
+    )
+    order = cursor.fetchone()
+
+    if not order:
+        await message.answer("❗ Заказ не найден. Напишите администратору.")
+        return
+
+    # Обновляем статус
     cursor.execute(
         "UPDATE orders SET status='new' WHERE id=?",
         (order_id,)
     )
     db.commit()
 
-    cursor.execute(
-        "SELECT * FROM orders WHERE id=?",
-        (order_id,)
-    )
-    o = cursor.fetchone()
+    # Имя пользователя
+    username = message.from_user.username
+    buyer = f"@{username}" if username else message.from_user.full_name
 
-    if not o:
-        await message.answer("❗ Ошибка получения чека. Напишите администратору.")
-        return
+    service_name = order[4]
+    price = order[6]
+    date = order[8]
 
+    # Отправляем чек
     await message.answer(
 f"""🧾 ЧЕК ОБ ОПЛАТЕ
 
 📦 Услуга:
-{o[4]}
+{service_name}
 
 ⭐ Стоимость:
-{o[6]} Telegram Stars
+{price} Telegram Stars
 
 🕒 Дата:
-{o[8]}
+{date}
 
 👤 Покупатель:
-{message.from_user.full_name}
+{buyer}
 
 ━━━━━━━━━━━━━━━
 
@@ -453,18 +470,27 @@ f"""🧾 ЧЕК ОБ ОПЛАТЕ
 
 📩 Администратор уже получил ваш заказ.
 Ожидайте выполнения услуги."""
-)
+    )
 
+    # Отправляем заказ админу
     await bot.send_message(
         ADMIN_ID,
 f"""📥 Новый заказ
 
-👤 {o[3]}
-📝 {o[4]}
-⏰ {o[8]}
+👤 {buyer}
+📦 {service_name}
+⭐ {price} Stars
+⏰ {date}
 
 /admin"""
     )
+
+    # Пытаемся очистить чат
+    try:
+        await message.delete()
+    except:
+        pass
+        
 # ============================================================
 # ADMIN PANEL
 # ============================================================
@@ -821,6 +847,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
