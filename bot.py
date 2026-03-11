@@ -214,9 +214,9 @@ async def sets_start(call: CallbackQuery):
 
     kb = InlineKeyboardMarkup(inline_keyboard=[
 
-        [InlineKeyboardButton(text="➡ Далее", callback_data="set_next_0")],
+        [InlineKeyboardButton(text="➡ Далее", callback_data=f"set_next:{index}")],
 
-        [InlineKeyboardButton(text="💳 Купить", callback_data="buy_set_0")],
+        [InlineKeyboardButton(text="💳 Купить", callback_data=f"buy_set:{index}")],
 
         [InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu")]
 
@@ -235,10 +235,10 @@ async def sets_start(call: CallbackQuery):
 # NEXT SET
 # =====================================================
 
-@dp.callback_query(F.data.startswith("set_next_"))
+@dp.callback_query(F.data.startswith("set_next:"))
 async def set_next(call: CallbackQuery):
 
-    index = int(call.data.split("_")[2]) + 1
+    index = int(call.data.split(":")[1]) + 1
 
     if index >= len(SETS):
         index = 0
@@ -248,11 +248,11 @@ async def set_next(call: CallbackQuery):
     kb = InlineKeyboardMarkup(inline_keyboard=[
 
         [
-        InlineKeyboardButton(text="⬅ Назад", callback_data=f"set_prev_{index}"),
-        InlineKeyboardButton(text="➡ Далее", callback_data=f"set_next_{index}")
+        InlineKeyboardButton(text="⬅ Назад", callback_data=f"set_prev:{index}"),
+        InlineKeyboardButton(text="➡ Далее", callback_data=f"set_next:{index}")
         ],
 
-        [InlineKeyboardButton(text="💳 Купить", callback_data=f"buy_set_{index}")],
+        [InlineKeyboardButton(text="💳 Купить", callback_data=f"buy_set:{index}")],
 
         [InlineKeyboardButton(text="🏠 Меню", callback_data="back_menu")]
 
@@ -273,10 +273,10 @@ async def set_next(call: CallbackQuery):
 # PREVIOUS SET
 # =====================================================
 
-@dp.callback_query(F.data.startswith("set_prev_"))
+@dp.callback_query(F.data.startswith("set_prev:"))
 async def set_prev(call: CallbackQuery):
 
-    index = int(call.data.split("_")[2]) - 1
+    index = int(call.data.split(":")[1]) - 1
 
     if index < 0:
         index = len(SETS) - 1
@@ -286,11 +286,11 @@ async def set_prev(call: CallbackQuery):
     kb = InlineKeyboardMarkup(inline_keyboard=[
 
         [
-        InlineKeyboardButton(text="⬅ Назад", callback_data=f"set_prev_{index}"),
-        InlineKeyboardButton(text="➡ Далее", callback_data=f"set_next_{index}")
+        InlineKeyboardButton(text="⬅ Назад", callback_data=f"set_prev:{index}"),
+        InlineKeyboardButton(text="➡ Далее", callback_data=f"set_next:{index}")
         ],
 
-        [InlineKeyboardButton(text="💳 Купить", callback_data=f"buy_set_{index}")],
+        [InlineKeyboardButton(text="💳 Купить", callback_data=f"buy_set:{index}")],
 
         [InlineKeyboardButton(text="🏠 Меню", callback_data="back_menu")]
 
@@ -311,10 +311,10 @@ async def set_prev(call: CallbackQuery):
 # BUY SET
 # =====================================================
 
-@dp.callback_query(F.data.startswith("buy_set_"))
+@dp.callback_query(F.data.startswith("buy_set:"))
 async def buy_set(call: CallbackQuery):
 
-    index = int(call.data.split("_")[2])
+    index = int(call.data.split(":")[1])
 
     s = SETS[index]
 
@@ -1179,6 +1179,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
