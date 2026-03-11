@@ -230,6 +230,11 @@ async def sets_start(call: CallbackQuery):
         reply_markup=kb
     )
 
+
+# =====================================================
+# NEXT SET
+# =====================================================
+
 @dp.callback_query(F.data.startswith("set_next_"))
 async def set_next(call: CallbackQuery):
 
@@ -253,15 +258,20 @@ async def set_next(call: CallbackQuery):
 
     ])
 
-    photo = FSInputFile(s["photo"])
+    media = InputMediaPhoto(
+        media=FSInputFile(s["photo"]),
+        caption=s["text"]
+    )
 
-    await call.message.delete()
-
-    await call.message.answer_photo(
-        photo,
-        caption=s["text"],
+    await call.message.edit_media(
+        media=media,
         reply_markup=kb
     )
+
+
+# =====================================================
+# PREVIOUS SET
+# =====================================================
 
 @dp.callback_query(F.data.startswith("set_prev_"))
 async def set_prev(call: CallbackQuery):
@@ -286,15 +296,20 @@ async def set_prev(call: CallbackQuery):
 
     ])
 
-    photo = FSInputFile(s["photo"])
+    media = InputMediaPhoto(
+        media=FSInputFile(s["photo"]),
+        caption=s["text"]
+    )
 
-    await call.message.delete()
-
-    await call.message.answer_photo(
-        photo,
-        caption=s["text"],
+    await call.message.edit_media(
+        media=media,
         reply_markup=kb
     )
+
+
+# =====================================================
+# BUY SET
+# =====================================================
 
 @dp.callback_query(F.data.startswith("buy_set_"))
 async def buy_set(call: CallbackQuery):
@@ -327,16 +342,18 @@ async def buy_set(call: CallbackQuery):
         prices=prices
     )
 
+
+# =====================================================
+# BACK MENU
+# =====================================================
+
 @dp.callback_query(F.data == "back_menu")
 async def back_menu(call: CallbackQuery):
 
-    await call.message.delete()
-
-    await call.message.answer(
-        "🏠 Главное меню",
+    await call.message.edit_text(
+        "🏠 Главное меню\n\nВыберите действие ниже:",
         reply_markup=main_menu()
     )
-    
 # ============================================================
 # START
 # ============================================================
@@ -1162,6 +1179,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
