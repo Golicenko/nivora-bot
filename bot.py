@@ -82,10 +82,18 @@ POPULAR = [
 ]
 
 SERVICES = [
-"👑 ранг кинг","🎭 Открыть анимации","🏠 Открыть дома 3",
-"🏆 Отключить повреждения","⛽ Бесконечное топливо",
-"🚀 W16 двигатель","🔊 Открыть дон гудки","💨 Открыть дым",
-"📀 Открыть диски","⚡ сили 300/414/800","💵 Деньги","🪙 Коины"
+"🪙 Коины — 30.000",
+"💰 Вирты — 50.000.000",
+"💪 Силы — 300 / 414 / 800 / 1625",
+"🏎 Донатный W16",
+"🚗 Чит машина",
+"⚙️ Настройка трансмиссии",
+"✨ Хром машина",
+"🧰 Боди кит (ваш выбор)",
+"⚖️ Изменение массы машины",
+"🏠 Открыть 3 дом",
+"📋 Копирование вашей машины",
+"⛽ Бесконечное топливо"
 ]
 
 # ============================================================
@@ -318,14 +326,14 @@ datetime.now().strftime("%Y-%m-%d %H:%M")
     db.commit()
 
     await bot.send_invoice(
-        call.from_user.id,
-        title="Игровая услуга",
-        description=service,
-        payload=f"order_{order_id}",
-        provider_token="",
-        currency="XTR",
-        prices=[LabeledPrice(label="Услуга",amount=10)]
-    )
+chat_id=call.from_user.id,
+title="Игровая услуга",
+description=service,
+payload=f"service_{service}",
+provider_token="",
+currency="XTR",
+prices=[LabeledPrice(label=service, amount=10)]
+)
 
 # ============================================================
 # ASK QUESTION
@@ -425,15 +433,27 @@ async def payment(message: Message):
         return
 
     await message.answer(
-f"""🧾 Чек
+f"""🧾 ЧЕК ОБ ОПЛАТЕ
 
-👤 {o[3]}
-📦 {o[4]}
-⭐ {o[6]}
-📅 {o[8]}
+📦 Услуга:
+{o[4]}
 
-✅ Оплата прошла успешно"""
-    )
+⭐ Стоимость:
+{o[6]} Telegram Stars
+
+🕒 Дата:
+{o[8]}
+
+👤 Покупатель:
+@{message.from_user.username}
+
+━━━━━━━━━━━━━━━
+
+✅ Оплата прошла успешно!
+
+📩 Администратор уже получил ваш заказ.
+Ожидайте выполнения услуги."""
+)
 
     await bot.send_message(
         ADMIN_ID,
@@ -801,6 +821,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
