@@ -394,53 +394,64 @@ async def start(message: Message):
 После ознакомления ты можешь перейти в основное меню бота.
 """
 
-    InlineKeyboardMarkup(
-    inline_keyboard=[
-
-        [
-            InlineKeyboardButton(
-                text="🔎 Почему нам можно доверять",
-                web_app=WebAppInfo(
-                    url="https://golicenko.github.io/nivora-bot/trust.html"
-                )
-            )
-        ],
-
-        [
-            InlineKeyboardButton(
-                text="🔒 Гарантии безопасности",
-                web_app=WebAppInfo(
-                    url="https://golicenko.github.io/nivora-bot/security.html"
-                )
-            )
-        ],
-
-        [
-            InlineKeyboardButton(
-                text="🛒 Как проходит покупка",
-                web_app=WebAppInfo(
-                    url="https://golicenko.github.io/nivora-bot/purchase.html"
-                )
-            )
-        ],
-
-        [
-            InlineKeyboardButton(
-                text="🌐 Наши каналы",
-                web_app=WebAppInfo(
-                    url="https://golicenko.github.io/nivora-bot/channels.html"
-                )
-            )
-        ]
-
-    ]
-)
-
     await message.answer(
         text,
-        reply_markup=keyboard
+        reply_markup=trust_menu()
     )
 
+def trust_menu():
+
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+
+            [
+                InlineKeyboardButton(
+                    text="🔎 Почему нам можно доверять",
+                    web_app=WebAppInfo(
+                        url="https://golicenko.github.io/nivora-bot/trust.html"
+                    )
+                )
+            ],
+
+            [
+                InlineKeyboardButton(
+                    text="🔒 Гарантии безопасности",
+                    web_app=WebAppInfo(
+                        url="https://golicenko.github.io/nivora-bot/security.html"
+                    )
+                )
+            ],
+
+            [
+                InlineKeyboardButton(
+                    text="🛒 Как проходит покупка",
+                    web_app=WebAppInfo(
+                        url="https://golicenko.github.io/nivora-bot/purchase.html"
+                    )
+                )
+            ],
+
+            [
+                InlineKeyboardButton(
+                    text="🌐 Наши официальные каналы",
+                    web_app=WebAppInfo(
+                        url="https://golicenko.github.io/nivora-bot/channels.html"
+                    )
+                )
+            ],
+
+            [
+                InlineKeyboardButton(
+                    text="🚀 Перейти в меню бота",
+                    callback_data="back_menu"
+                )
+            ]
+
+        ]
+    )
+
+    return keyboard
+    
 # ============================================================
 # BACK
 # ============================================================
@@ -1251,6 +1262,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
