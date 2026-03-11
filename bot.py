@@ -746,14 +746,14 @@ async def reply_send(message: Message, state: FSMContext):
     )
 
     # отправляем ответ клиенту
-msg = await bot.send_message(
-    user_id,
-    f"📩 Ответ\n\n{message.text}",
-    reply_markup=kb
-)
+    msg = await bot.send_message(
+        user_id,
+        f"📩 Ответ\n\n{message.text}",
+        reply_markup=kb
+    )
 
     # меняем статус заказа
-cursor.execute(
+    cursor.execute(
         "UPDATE orders SET status='done' WHERE id=?",
         (order_id,)
     )
@@ -786,6 +786,7 @@ cursor.execute(
         "⚙️ Админ панель",
         reply_markup=admin_menu()
     )
+    
 # ============================================================
 # DONE ORDERS
 # ============================================================
@@ -882,6 +883,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
