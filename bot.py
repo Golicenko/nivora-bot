@@ -399,7 +399,7 @@ async def start(message: Message):
 @dp.callback_query(F.data == "back")
 async def back(call: CallbackQuery):
     await call.message.edit_text(
-        "🏠 Главное меню",
+        "🏠 Главное меню\n\nВыберите нужный раздел ниже или задайте вопрос",
         reply_markup=main_menu()
     )
 
@@ -1202,6 +1202,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
