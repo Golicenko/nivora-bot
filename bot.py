@@ -753,7 +753,7 @@ msg = await bot.send_message(
 )
 
     # меняем статус заказа
-    cursor.execute(
+cursor.execute(
         "UPDATE orders SET status='done' WHERE id=?",
         (order_id,)
     )
@@ -882,6 +882,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
