@@ -1,5 +1,5 @@
 # ============================================================
-# TELEGRAM BOT FULL FIXED VERSION
+# TELEGRAM BOT 
 # ============================================================
 
 import asyncio
@@ -414,7 +414,7 @@ async def checkout(pre_checkout_query: PreCheckoutQuery):
 async def payment(message: Message):
 
     payload = message.successful_payment.invoice_payload
-    order_id = int(payload.split("_")[1])
+    order_id = int(payload.split("_")[-1])
 
     cursor.execute(
         "UPDATE orders SET status='new' WHERE id=?",
@@ -445,7 +445,7 @@ f"""🧾 ЧЕК ОБ ОПЛАТЕ
 {o[8]}
 
 👤 Покупатель:
-@{message.from_user.username}
+{message.from_user.full_name}
 
 ━━━━━━━━━━━━━━━
 
@@ -821,6 +821,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
