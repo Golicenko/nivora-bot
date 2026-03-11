@@ -357,10 +357,13 @@ async def buy_set(call: CallbackQuery):
 @dp.callback_query(F.data == "back_menu")
 async def back_menu(call: CallbackQuery):
 
-    await call.message.edit_text(
-        "🏠 Главное меню\n\nВыберите действие ниже:",
-        reply_markup=main_menu()
-    )
+    try:
+        await call.message.delete()
+    except:
+        pass
+
+    await call.answer()
+    
 # ============================================================
 # START
 # ============================================================
@@ -1200,6 +1203,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
