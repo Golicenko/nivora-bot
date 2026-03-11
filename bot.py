@@ -825,7 +825,7 @@ async def back_menu(call: CallbackQuery):
         pass
 
     await call.message.answer(
-        "🏠 Главное меню",
+        "🏠 Главное меню\n\nВыберите нужный раздел ниже или задайте вопрос",
         reply_markup=main_menu
     )
 
@@ -1202,6 +1202,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
