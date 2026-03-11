@@ -408,21 +408,22 @@ async def payment(message: Message):
     payload = message.successful_payment.invoice_payload
     order_id = int(payload.split("_")[1])
 
-    # меняем статус заказа
     cursor.execute(
         "UPDATE orders SET status='new' WHERE id=?",
         (order_id,)
     )
     db.commit()
 
-    # получаем заказ
     cursor.execute(
         "SELECT * FROM orders WHERE id=?",
         (order_id,)
     )
     o = cursor.fetchone()
 
-    # отправляем чек пользователю
+    if not o:
+        await message.answer("❗ Ошибка получения чека. Напишите администратору.")
+        return
+
     await message.answer(
 f"""🧾 Чек
 
@@ -434,7 +435,6 @@ f"""🧾 Чек
 ✅ Оплата прошла успешно"""
     )
 
-    # отправляем заказ админу
     await bot.send_message(
         ADMIN_ID,
 f"""📥 Новый заказ
@@ -801,6 +801,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
