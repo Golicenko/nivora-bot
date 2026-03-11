@@ -497,18 +497,15 @@ async def take_order(call: CallbackQuery):
     order_id = int(call.data.split("_")[1])
 
     cursor.execute(
-        "UPDATE orders SET status='work' WHERE id=?",
+        "UPDATE orders SET status='new' WHERE id=?",
         (order_id,)
     )
     db.commit()
 
+    # удаляем сообщение из чата
     await call.message.delete()
 
-    await call.message.answer(
-        f"🛠 Заказ #{order_id} принят в работу"
-    )
-
-    await call.answer()
+    await call.answer("Заказ принят")
     
 # ============================================================
 # ADMIN PANEL
@@ -866,6 +863,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
