@@ -337,8 +337,6 @@ async def buy_set(call: CallbackQuery):
         price
     )
 
-    amount = price * 100
-
     prices = [LabeledPrice(label=name, amount=amount)]
 
     await bot.send_invoice(
@@ -1097,30 +1095,44 @@ async def reply_send(message: Message, state: FSMContext):
 # ============================================================
 
 @dp.callback_query(F.data=="admin_done")
-async def admin_done(call: CallbackQuery):
+async def admin_done(call:CallbackQuery):
 
     cursor.execute(
-    "SELECT COUNT(*) FROM orders WHERE status='done' AND date(date)=date('now')"
+        "SELECT * FROM orders WHERE status='done' ORDER BY id DESC"
     )
-    today = cursor.fetchone()[0]
 
-    cursor.execute(
-    "SELECT COUNT(*) FROM orders WHERE status='done'"
-    )
-    all_time = cursor.fetchone()[0]
+    orders = cursor.fetchall()
 
-    kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="⬅ Назад", callback_data="admin_back")]
+    buttons = []
+
+    for o in orders:
+
+        buttons.append([
+            InlineKeyboardButton(
+                text=f"{o[3]} | {o[8]}",
+                callback_data="none"
+            )
+        ])
+
+    if not buttons:
+
+        buttons.append([
+            InlineKeyboardButton(
+                text="❗ Готовых заказов нет",
+                callback_data="none"
+            )
+        ])
+
+    buttons.append([
+        InlineKeyboardButton(
+            text="⬅ Назад",
+            callback_data="admin_back"
+        )
     ])
 
     await call.message.edit_text(
-f"""✅ Готовые заказы
-
-Сделано сегодня: {today}
-
-Все время: {all_time}
-""",
-        reply_markup=kb
+        "✅ Готовые заказы",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons)
     )
  
 # ============================================================
@@ -1188,6 +1200,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
