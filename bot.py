@@ -10,8 +10,9 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.types import (
     Message, CallbackQuery, InlineKeyboardMarkup,
     InlineKeyboardButton, LabeledPrice, PreCheckoutQuery,
-    FSInputFile
+    FSInputFile, InputMediaPhoto
 )
+
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -214,9 +215,9 @@ async def sets_start(call: CallbackQuery):
 
     kb = InlineKeyboardMarkup(inline_keyboard=[
 
-        [InlineKeyboardButton(text="➡ Далее", callback_data=f"set_next:{index}")],
+        [InlineKeyboardButton(text="➡ Далее", callback_data="set_next:0")],
 
-        [InlineKeyboardButton(text="💳 Купить", callback_data=f"buy_set:{index}")],
+        [InlineKeyboardButton(text="💳 Купить", callback_data="buy_set:0")],
 
         [InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu")]
 
@@ -240,22 +241,26 @@ async def set_next(call: CallbackQuery):
 
     index = int(call.data.split(":")[1]) + 1
 
-    if index >= len(SETS):
-        index = 0
-
     s = SETS[index]
 
+    buttons = []
+
+    # Кнопки навигации
+    if index == 1:
+        buttons.append([
+            InlineKeyboardButton(text="⬅ Назад", callback_data="set_prev:1"),
+            InlineKeyboardButton(text="➡ Далее", callback_data="set_next:1")
+        ])
+
+    elif index == 2:
+        buttons.append([
+            InlineKeyboardButton(text="⬅ Назад", callback_data="set_prev:2")
+        ])
+
     kb = InlineKeyboardMarkup(inline_keyboard=[
-
-        [
-        InlineKeyboardButton(text="⬅ Назад", callback_data=f"set_prev:{index}"),
-        InlineKeyboardButton(text="➡ Далее", callback_data=f"set_next:{index}")
-        ],
-
+        *buttons,
         [InlineKeyboardButton(text="💳 Купить", callback_data=f"buy_set:{index}")],
-
         [InlineKeyboardButton(text="🏠 Меню", callback_data="back_menu")]
-
     ])
 
     media = InputMediaPhoto(
@@ -278,23 +283,26 @@ async def set_prev(call: CallbackQuery):
 
     index = int(call.data.split(":")[1]) - 1
 
-    if index < 0:
-        index = len(SETS) - 1
-
     s = SETS[index]
 
-    kb = InlineKeyboardMarkup(inline_keyboard=[
+    if index == 0:
 
-        [
-        InlineKeyboardButton(text="⬅ Назад", callback_data=f"set_prev:{index}"),
-        InlineKeyboardButton(text="➡ Далее", callback_data=f"set_next:{index}")
-        ],
+        kb = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="➡ Далее", callback_data="set_next:0")],
+            [InlineKeyboardButton(text="💳 Купить", callback_data="buy_set:0")],
+            [InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu")]
+        ])
 
-        [InlineKeyboardButton(text="💳 Купить", callback_data=f"buy_set:{index}")],
+    else:
 
-        [InlineKeyboardButton(text="🏠 Меню", callback_data="back_menu")]
-
-    ])
+        kb = InlineKeyboardMarkup(inline_keyboard=[
+            [
+                InlineKeyboardButton(text="⬅ Назад", callback_data=f"set_prev:{index}"),
+                InlineKeyboardButton(text="➡ Далее", callback_data=f"set_next:{index}")
+            ],
+            [InlineKeyboardButton(text="💳 Купить", callback_data=f"buy_set:{index}")],
+            [InlineKeyboardButton(text="🏠 Меню", callback_data="back_menu")]
+        ])
 
     media = InputMediaPhoto(
         media=FSInputFile(s["photo"]),
@@ -305,7 +313,6 @@ async def set_prev(call: CallbackQuery):
         media=media,
         reply_markup=kb
     )
-
 
 # =====================================================
 # BUY SET
@@ -330,7 +337,9 @@ async def buy_set(call: CallbackQuery):
         price
     )
 
-    prices = [LabeledPrice(label=name, amount=price)]
+    amount = price * 100
+
+    prices = [LabeledPrice(label=name, amount=amount)]
 
     await bot.send_invoice(
         call.from_user.id,
@@ -1179,6 +1188,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
