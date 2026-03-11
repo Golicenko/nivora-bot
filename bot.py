@@ -9,7 +9,8 @@ from datetime import datetime, timedelta
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import (
     Message, CallbackQuery, InlineKeyboardMarkup,
-    InlineKeyboardButton, LabeledPrice, PreCheckoutQuery
+    InlineKeyboardButton, LabeledPrice, PreCheckoutQuery,
+    FSInputFile
 )
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -52,6 +53,18 @@ date TEXT
 
 db.commit()
 
+def create_order(user_id, username, name, text, type, price):
+
+    now = datetime.now().strftime("%d.%m.%Y")
+
+    cursor.execute(
+        "INSERT INTO orders(user_id, username, name, text, type, price, status, date) VALUES(?,?,?,?,?,?,?,?)",
+        (user_id, username, name, text, type, price, "waiting_payment", now)
+    )
+
+    db.commit()
+
+    return cursor.lastrowid
 # ============================================================
 # STATES
 # ============================================================
@@ -96,6 +109,71 @@ SERVICES = [
 "⛽ Бесконечное топливо"
 ]
 
+# =====================================================
+# SETS DATA
+# =====================================================
+
+SETS = [
+
+{
+"name": "🥉 Стартовый набор",
+"photo": "standard.jpg",
+"text": """🥉 Набор №1 — Стартовый
+
+Что входит:
+
+💰 Вирты — 50.000.000
+🪙 Коины — 10.000
+⚙️ Чит силы 300 / 414 / 800 / 1695
+
+⭐ Цена: 20 Stars
+""",
+"price": 20
+},
+
+{
+"name": "🥈 Продвинутый набор",
+"photo": "pro.jpg",
+"text": """🥈 Набор №2 — Продвинутый
+
+Что входит:
+
+💰 Вирты — 50.000.000
+🪙 Коины — 30.000
+💪 Силы — 300 / 414 / 800 / 1625
+🚗 Чит машина
+🏠 Дом 3
+
+⭐ Цена: 35 Stars
+""",
+"price": 35
+},
+
+{
+"name": "🥇 Полный набор",
+"photo": "vip.jpg",
+"text": """🥇 Набор №3 — Полный
+
+Что входит:
+
+💰 Вирты — 50.000.000
+🪙 Коины — 30.000
+💪 Силы — 300 / 414 / 800 / 1625
+🏎 Донатный W16
+🚗 Чит машина
+⚙️ Настройка трансмиссии
+✨ Хром машина
+🧰 Боди кит
+⚖️ Изменение массы машины
+🏠 Открыть 3 дом
+⛽ Бесконечное топливо
+
+⭐ Цена: 50 Stars
+""",
+"price": 50
+}
+
+]
 # ============================================================
 # MENUS
 # ============================================================
@@ -104,7 +182,7 @@ def main_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🤩 Популярные вопросы", callback_data="popular")],
         [InlineKeyboardButton(text="✍️ Написать свой вопрос", callback_data="ask")],
-        [InlineKeyboardButton(text="🚘 Услуги в игре", callback_data="services")]
+        [InlineKeyboardButton(text="🚘 Услуги в игре", callback_data="services")],
         [InlineKeyboardButton(text="🎁 Наборы Car Parking", callback_data="sets")]
     ])
 
@@ -248,6 +326,17 @@ async def buy_set(call: CallbackQuery):
         currency="XTR",
         prices=prices
     )
+
+@dp.callback_query(F.data == "back_menu")
+async def back_menu(call: CallbackQuery):
+
+    await call.message.delete()
+
+    await call.message.answer(
+        "🏠 Главное меню",
+        reply_markup=main_menu()
+    )
+    
 # ============================================================
 # START
 # ============================================================
@@ -1073,6 +1162,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
