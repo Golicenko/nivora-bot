@@ -181,10 +181,15 @@ SETS = [
 
 def main_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🤩 Популярные вопросы", callback_data="popular")],
-        [InlineKeyboardButton(text="✍️ Написать свой вопрос", callback_data="ask")],
+
+        [InlineKeyboardButton(text="🎁 Наборы услуг (лучшее)", callback_data="sets")],
+
         [InlineKeyboardButton(text="🚘 Услуги в игре", callback_data="services")],
-        [InlineKeyboardButton(text="🎁 Наборы Услуг", callback_data="sets")]
+
+        [InlineKeyboardButton(text="✍️ Задать свой вопрос", callback_data="ask")],
+
+        [InlineKeyboardButton(text="🤩 Популярные вопросы", callback_data="popular")]
+
     ])
 
 
@@ -444,7 +449,12 @@ def trust_menu():
 @dp.callback_query(F.data == "back")
 async def back(call: CallbackQuery):
     await call.message.edit_text(
-        "🏠 Главное меню\n\nВыберите нужный раздел ниже или задайте вопрос",
+       """AF-Bot 🏠Главное меню
+
+Прокачай свой аккаунт в игре Car Parking.
+
+Выбери услугу, наборы
+или задай свой вопрос ниже 👇""",
         reply_markup=main_menu()
     )
 
@@ -1182,6 +1192,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
