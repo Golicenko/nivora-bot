@@ -471,8 +471,15 @@ def trust_menu():
 
 @dp.callback_query(F.data == "back")
 async def back(call: CallbackQuery):
-    await call.message.edit_text(
-       """AF-Bot 🏠Главное меню
+
+    try:
+        await call.message.delete()
+    except:
+        pass
+
+    await bot.send_message(
+        call.from_user.id,
+        """AF-Bot 🏠 Главное меню
 
 Прокачай свой аккаунт в игре Car Parking.
 
@@ -1085,12 +1092,16 @@ async def reply_send(message: Message, state: FSMContext):
     )
 
     # отправляем ответ клиенту
-    msg = await bot.send_message(
-        user_id,
-        f"📩 Ответ\n\n{message.text}",
-        reply_markup=kb
-    )
+    await bot.send_message(
+    user_id,
+    f"""📩 Ответ администратора
 
+{message.text}
+
+⬇ Нажмите кнопку ниже чтобы вернуться в меню.
+ сообщения будут удалены.""",
+    reply_markup=kb
+)
     # меняем статус заказа
     cursor.execute(
         "UPDATE orders SET status='done' WHERE id=?",
@@ -1222,6 +1233,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
