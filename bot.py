@@ -472,19 +472,15 @@ def trust_menu():
 @dp.callback_query(F.data == "back")
 async def back(call: CallbackQuery):
 
-    user_id = call.from_user.id
+    await call.message.edit_text(
+"""AF Bot — Главное меню
 
-    try:
-        await call.message.delete()
-    except:
-        pass
+🚘 Прокачай свой аккаунт в игре Car Parking.
 
-    # удаляем последние сообщения (чек + оплата)
-    for i in range(5):
-        try:
-            await bot.delete_message(user_id, call.message.message_id - i)
-        except:
-            pass
+Выбери услугу, наборы
+или задай свой вопрос ниже 👇""",
+        reply_markup=main_menu()
+    )
 
     await call.answer()
 
@@ -1242,6 +1238,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
