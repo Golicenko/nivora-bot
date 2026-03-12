@@ -464,7 +464,7 @@ async def analytics_today(call: CallbackQuery):
  
     # заказы сегодня
     cursor.execute(
-    "SELECT COUNT(*) FROM orders WHERE status='new' AND date >= date('now')
+    "SELECT COUNT(*) FROM orders WHERE status='new' AND date >= date('now')"
 )
     orders = cursor.fetchone()[0]
 
@@ -1182,6 +1182,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
