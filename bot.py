@@ -107,7 +107,10 @@ SERVICES = [
 "⚖️ Изменение массы машины",
 "🏠 Открыть 3 дом",
 "📋 Копирование вашей машины",
-"⛽ Бесконечное топливо"
+"⛽ Бесконечное топливо",
+"👑 Ранг King на аккаунт",
+"🛸 Машина НЛО на ваше авто",
+"🌈 Разноцветный ник в игре"
 ]
 
 # =====================================================
@@ -182,7 +185,7 @@ SETS = [
 def main_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
 
-        [InlineKeyboardButton(text="🎁 Наборы услуг (лучшее)", callback_data="sets")],
+        [InlineKeyboardButton(text="🎁 Наборы услуг (выгоднее)", callback_data="sets")],
 
         [InlineKeyboardButton(text="🚘 Услуги в игре", callback_data="services")],
 
@@ -1192,6 +1195,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
