@@ -223,11 +223,14 @@ async def sets_start(call: CallbackQuery):
 
     kb = InlineKeyboardMarkup(inline_keyboard=[
 
-        [InlineKeyboardButton(text="➡ Далее", callback_data="set_next:0")],
+        [
+            InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu"),
+            InlineKeyboardButton(text="➡ Далее", callback_data="set_next:0")
+        ],
 
         [InlineKeyboardButton(text="💳 Купить", callback_data="buy_set:0")],
 
-        [InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu")]
+        [InlineKeyboardButton(text="🏠 Меню", callback_data="back_menu")]
 
     ])
 
@@ -238,7 +241,6 @@ async def sets_start(call: CallbackQuery):
         ),
         reply_markup=kb
     )
-
 # =====================================================
 # NEXT SET
 # =====================================================
@@ -1195,6 +1197,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
