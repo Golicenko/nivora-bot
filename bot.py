@@ -758,7 +758,7 @@ async def payment(message: Message):
         return
 
     cursor.execute(
-        "UPDATE orders SET status='new' WHERE id=?",
+        "UPDATE orders SET status='paid' WHERE id=?",
         (order_id,)
     )
     db.commit()
@@ -823,15 +823,15 @@ async def take_order(call: CallbackQuery):
     order_id = int(call.data.split("_")[1])
 
     cursor.execute(
-        "UPDATE orders SET status='in_work' WHERE id=?",
+        "UPDATE orders SET status='new' WHERE id=?",
         (order_id,)
     )
+
     db.commit()
 
-    # удаляем сообщение из чата
     await call.message.delete()
 
-    await call.answer("Заказ принят")
+    await call.answer("Заказ добавлен в новые")
 
 # ============================================================
 # BACK TO MENU
@@ -1233,6 +1233,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
