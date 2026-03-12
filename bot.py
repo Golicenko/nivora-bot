@@ -472,21 +472,21 @@ def trust_menu():
 @dp.callback_query(F.data == "back")
 async def back(call: CallbackQuery):
 
+    user_id = call.from_user.id
+
     try:
         await call.message.delete()
     except:
         pass
 
-    await bot.send_message(
-        call.from_user.id,
-        """AF-Bot 🏠 Главное меню
+    # удаляем последние сообщения (чек + оплата)
+    for i in range(5):
+        try:
+            await bot.delete_message(user_id, call.message.message_id - i)
+        except:
+            pass
 
-Прокачай свой аккаунт в игре Car Parking.
-
-Выбери услугу, наборы
-или задай свой вопрос ниже 👇""",
-        reply_markup=main_menu()
-    )
+    await call.answer()
 
 # ============================================================
 # ANALYTICS TODAY
@@ -779,7 +779,7 @@ async def payment(message: Message):
     date = order[8]
 
     # чек пользователю
-    await message.answer(
+     receipt = await message.answer(
 f"""🧾 ЧЕК ОБ ОПЛАТЕ
 
 📦 Услуга:
@@ -808,6 +808,12 @@ f"""🧾 ЧЕК ОБ ОПЛАТЕ
             [InlineKeyboardButton(text="✅ Принять", callback_data=f"take_{order_id}")]
         ]
     )
+
+cursor.execute(
+    "UPDATE orders SET status='new', text=text WHERE id=?",
+    (order_id,)
+)
+db.commit()
 
     # сообщение админу
     await bot.send_message(
@@ -1092,16 +1098,16 @@ async def reply_send(message: Message, state: FSMContext):
     )
 
     # отправляем ответ клиенту
-    await bot.send_message(
+    reply_msg = await bot.send_message(
     user_id,
-    f"""📩 Ответ администратора
+    f"""📩 Ответ 
 
 {message.text}
 
-⬇ Нажмите кнопку ниже чтобы вернуться в меню.
- сообщения будут удалены.""",
+⬇ Нажмите кнопку ниже чтобы очистить чат и вернуться в меню""",
     reply_markup=kb
 )
+    
     # меняем статус заказа
     cursor.execute(
         "UPDATE orders SET status='done' WHERE id=?",
@@ -1233,6 +1239,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
