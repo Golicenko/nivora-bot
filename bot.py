@@ -56,7 +56,7 @@ db.commit()
 
 def create_order(user_id, username, name, text, type, price):
 
-    now = datetime.now().strftime("%d.%m.%Y")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     cursor.execute(
         "INSERT INTO orders(user_id, username, name, text, type, price, status, date) VALUES(?,?,?,?,?,?,?,?)",
@@ -629,77 +629,12 @@ datetime.now().strftime("%Y-%m-%d %H:%M")
 chat_id=call.from_user.id,
 title="Игровая услуга",
 description=service,
-payload=f"service_{service}",
+payload=f"order_{order_id}",
 provider_token="",
 currency="XTR",
 prices=[LabeledPrice(label=service, amount=10)]
 )
 
-# =====================================================
-# CAR PARKING SETS
-# =====================================================
-
-SETS = [
-
-{
-"name": "🥉 Стартовый набор",
-"photo": "standard.jpg",
-"text": """🥉 Набор №1 — Стартовый
-
-Что входит:
-
-💰 Вирты — 50.000.000
-🪙 Коины — 10.000
-⚙️ Чит силы 300 / 414 / 800 / 1695
-
-⭐ Цена: 20 Telegram Stars
-""",
-"price": 20
-},
-
-{
-"name": "🥈 Продвинутый набор",
-"photo": "pro.jpg",
-"text": """🥈 Набор №2 — Продвинутый
-
-Что входит:
-
-💰 Вирты — 50.000.000
-🪙 Коины — 30.000
-💪 Силы — 300 / 414 / 800 / 1625
-🚗 Чит машина
-🏠 Дом 3
-
-⭐ Цена: 35 Telegram Stars
-""",
-"price": 35
-},
-
-{
-"name": "🥇 Полный набор",
-"photo": "vip.jpg",
-"text": """🥇 Набор №3 — Полный
-
-Что входит:
-
-💰 Вирты — 50.000.000
-🪙 Коины — 30.000
-💪 Силы — 300 / 414 / 800 / 1625
-🏎 Донатный W16
-🚗 Чит машина
-⚙️ Настройка трансмиссии
-✨ Хром машина
-🧰 Боди кит (ваш выбор)
-⚖️ Изменение массы машины
-🏠 Открыть 3 дом
-⛽ Бесконечное топливо
-
-⭐ Цена: 50 Telegram Stars
-""",
-"price": 50
-}
-
-]
 # ============================================================
 # ASK QUESTION
 # ============================================================
@@ -886,7 +821,7 @@ async def back_menu(call: CallbackQuery):
 
     await call.message.answer(
         "🏠 Главное меню\n\nВыберите нужный раздел ниже или задайте вопрос",
-        reply_markup=main_menu
+        reply_markup=main_menu()
     )
 
     await call.answer()
@@ -1262,6 +1197,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
