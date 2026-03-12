@@ -173,7 +173,7 @@ SETS = [
 
 ⭐ Цена: 50 Stars
 """,
-"price": 50
+"price": 1
 }
 
 ]
@@ -823,7 +823,7 @@ async def take_order(call: CallbackQuery):
     order_id = int(call.data.split("_")[1])
 
     cursor.execute(
-        "UPDATE orders SET status='new' WHERE id=?",
+        "UPDATE orders SET status='in_work' WHERE id=?",
         (order_id,)
     )
     db.commit()
@@ -1233,6 +1233,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
