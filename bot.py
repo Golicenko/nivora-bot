@@ -824,20 +824,16 @@ async def take_order(call: CallbackQuery):
 @dp.callback_query(F.data == "back_menu")
 async def back_menu(call: CallbackQuery):
 
-    try:
-        await call.message.delete()
-    except:
-        pass
-
-    await call.message.answer(
+    await call.message.edit_text(
 """AF Bot — Главное меню
 
 🚘 Прокачай свой аккаунт в игре Car Parking.
 
 Выбери услугу, наборы
 или задай свой вопрос ниже 👇""",
-    reply_markup=main_menu()
-)
+        reply_markup=main_menu()
+    )
+
     await call.answer()
     
 # ============================================================
@@ -1211,6 +1207,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
