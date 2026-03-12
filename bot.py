@@ -367,14 +367,31 @@ async def buy_set(call: CallbackQuery):
 @dp.message(Command("start"))
 async def start(message: Message):
 
+    user_id = message.from_user.id
     name = message.from_user.first_name
+
+    conn = sqlite3.connect("bot.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users(
+        user_id INTEGER PRIMARY KEY
+    )
+    """)
+
+    cursor.execute(
+        "INSERT OR IGNORE INTO users (user_id) VALUES (?)",
+        (user_id,)
+    )
 
     # записываем посещение
     cursor.execute(
         "INSERT INTO visits(user_id,date) VALUES(?,?)",
-        (message.from_user.id, datetime.now().strftime("%Y-%m-%d"))
+        (user_id, datetime.now().strftime("%Y-%m-%d"))
     )
-    db.commit()
+
+    conn.commit()
+    conn.close()
 
     text = f"""Здравствуй, {name}! 👋
 
@@ -1217,6 +1234,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
