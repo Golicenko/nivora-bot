@@ -242,6 +242,46 @@ async def sets_start(call: CallbackQuery):
         reply_markup=kb
     )
 
+@dp.callback_query(F.data.startswith("set_next:"))
+async def set_next(call: CallbackQuery):
+
+    index = int(call.data.split(":")[1]) + 1
+
+    if index >= len(SETS):
+        index = len(SETS) - 1
+
+    s = SETS[index]
+
+    buttons = []
+
+    if index == 1:
+        buttons.append([
+            InlineKeyboardButton(text="⬅ Назад", callback_data="set_prev:1"),
+            InlineKeyboardButton(text="➡ Далее", callback_data="set_next:1")
+        ])
+
+    elif index == 2:
+        buttons.append([
+            InlineKeyboardButton(text="⬅ Назад", callback_data="set_prev:2")
+        ])
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        *buttons,
+        [InlineKeyboardButton(text="💳 Купить", callback_data=f"buy_set:{index}")],
+        [InlineKeyboardButton(text="🏠 Меню", callback_data="back_menu")]
+    ])
+
+    media = InputMediaPhoto(
+        media=FSInputFile(s["photo"]),
+        caption=s["text"]
+    )
+
+    await call.message.edit_media(
+        media=media,
+        reply_markup=kb
+    )
+
+
 # =====================================================
 # PREVIOUS SET
 # =====================================================
@@ -1171,6 +1211,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
