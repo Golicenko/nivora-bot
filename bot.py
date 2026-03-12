@@ -173,7 +173,7 @@ SETS = [
 
 ⭐ Цена: 50 Stars
 """,
-"price": 1
+"price": 50
 }
 
 ]
@@ -1242,6 +1242,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
