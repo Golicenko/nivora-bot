@@ -742,7 +742,7 @@ async def payment(message: Message):
     payload = message.successful_payment.invoice_payload
 
     try:
-        order_id = int(payload.split("_")[-1])
+        order_id = int(payload.split("_")[1])
     except:
         await message.answer("❗ Ошибка обработки платежа.")
         return
@@ -754,14 +754,15 @@ async def payment(message: Message):
     order = cursor.fetchone()
 
     if not order:
-        await message.answer("❗ Заказ не найден. Напишите администратору.")
+        await message.answer("❗ Заказ не найден.")
         return
 
+    # меняем статус заказа
     cursor.execute(
         "UPDATE orders SET status='new' WHERE id=?",
-    (order_id,)
-)
-db.commit()
+        (order_id,)
+    )
+    db.commit()
 
     username = message.from_user.username
     buyer = f"@{username}" if username else message.from_user.full_name
@@ -770,7 +771,7 @@ db.commit()
     price = order[6]
     date = order[8]
 
-    # ЧЕК
+    # чек пользователю
     await message.answer(
 f"""🧾 ЧЕК ОБ ОПЛАТЕ
 
@@ -792,25 +793,27 @@ f"""🧾 ЧЕК ОБ ОПЛАТЕ
 
 📩 Администратор уже получил ваш заказ.
 Ожидайте выполнения услуги."""
-)
+    )
 
-    # КНОПКА ПРИНЯТЬ
+    # кнопка принять
     kb = InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(text="✅ Принять", callback_data=f"take_{order_id}")]
         ]
     )
 
-    # ЗАКАЗ АДМИНУ
+    # сообщение админу
     await bot.send_message(
         ADMIN_ID,
 f"""📥 Новый заказ
 
-👤 {buyer}
-📦 {service}
-⭐ {price} Stars
-⏰ {date}""",
-reply_markup=kb
+👤 Покупатель: {buyer}
+📦 Услуга: {service}
+⭐ Цена: {price} Stars
+🕒 Дата: {date}
+
+Нажмите "Принять", чтобы добавить заказ в новые.""",
+        reply_markup=kb
     )
 
 # ============================================================
@@ -1219,6 +1222,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
