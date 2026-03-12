@@ -1130,6 +1130,19 @@ async def reply_send(message: Message, state: FSMContext):
 @dp.callback_query(F.data=="admin_done")
 async def admin_done(call:CallbackQuery):
 
+    # все готовые
+    cursor.execute(
+        "SELECT COUNT(*) FROM orders WHERE status='done'"
+    )
+    all_done = cursor.fetchone()[0]
+
+    # готовые сегодня
+    cursor.execute(
+        "SELECT COUNT(*) FROM orders WHERE status='done' AND date(date)=date('now')"
+    )
+    today_done = cursor.fetchone()[0]
+
+    # список заказов
     cursor.execute(
         "SELECT * FROM orders WHERE status='done' ORDER BY id DESC"
     )
@@ -1148,7 +1161,6 @@ async def admin_done(call:CallbackQuery):
         ])
 
     if not buttons:
-
         buttons.append([
             InlineKeyboardButton(
                 text="❗ Готовых заказов нет",
@@ -1164,10 +1176,13 @@ async def admin_done(call:CallbackQuery):
     ])
 
     await call.message.edit_text(
-        "✅ Готовые заказы",
+f"""✅ Готовые заказы
+
+📅 Сегодня: {today_done}
+📊 За всё время: {all_done}
+""",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons)
     )
- 
 # ============================================================
 # STATS
 # ============================================================
@@ -1233,6 +1248,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
