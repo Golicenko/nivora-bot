@@ -250,6 +250,9 @@ async def set_next(call: CallbackQuery):
 
     index = int(call.data.split(":")[1]) + 1
 
+if index >= len(SETS):
+    index = len(SETS) - 1
+
     s = SETS[index]
 
     buttons = []
@@ -292,6 +295,9 @@ async def set_prev(call: CallbackQuery):
 
     index = int(call.data.split(":")[1]) - 1
 
+    if index < 0:
+    index = 0
+    
     s = SETS[index]
 
     if index == 0:
@@ -820,10 +826,14 @@ async def back_menu(call: CallbackQuery):
         pass
 
     await call.message.answer(
-        "🏠 Главное меню\n\nВыберите нужный раздел ниже или задайте вопрос",
-        reply_markup=main_menu()
-    )
+"""AF Bot — Главное меню
 
+🚘 Прокачай свой аккаунт в игре Car Parking.
+
+Выбери услугу, наборы
+или задай свой вопрос ниже 👇""",
+    reply_markup=main_menu()
+)
     await call.answer()
     
 # ============================================================
@@ -1197,6 +1207,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
