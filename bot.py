@@ -245,35 +245,37 @@ async def sets_start(call: CallbackQuery):
 # NEXT SET
 # =====================================================
 
-@dp.callback_query(F.data.startswith("set_next:"))
-async def set_next(call: CallbackQuery):
+@dp.callback_query(F.data.startswith("set_prev:"))
+async def set_prev(call: CallbackQuery):
 
-    index = int(call.data.split(":")[1]) + 1
+    index = int(call.data.split(":")[1]) - 1
 
-if index >= len(SETS):
-    index = len(SETS) - 1
+    if index < 0:
+        index = 0
 
     s = SETS[index]
 
-    buttons = []
+    if index == 0:
 
-    # Кнопки навигации
-    if index == 1:
-        buttons.append([
-            InlineKeyboardButton(text="⬅ Назад", callback_data="set_prev:1"),
-            InlineKeyboardButton(text="➡ Далее", callback_data="set_next:1")
+        kb = InlineKeyboardMarkup(inline_keyboard=[
+            [
+                InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu"),
+                InlineKeyboardButton(text="➡ Далее", callback_data="set_next:0")
+            ],
+            [InlineKeyboardButton(text="💳 Купить", callback_data="buy_set:0")],
+            [InlineKeyboardButton(text="🏠 Меню", callback_data="back_menu")]
         ])
 
-    elif index == 2:
-        buttons.append([
-            InlineKeyboardButton(text="⬅ Назад", callback_data="set_prev:2")
-        ])
+    else:
 
-    kb = InlineKeyboardMarkup(inline_keyboard=[
-        *buttons,
-        [InlineKeyboardButton(text="💳 Купить", callback_data=f"buy_set:{index}")],
-        [InlineKeyboardButton(text="🏠 Меню", callback_data="back_menu")]
-    ])
+        kb = InlineKeyboardMarkup(inline_keyboard=[
+            [
+                InlineKeyboardButton(text="⬅ Назад", callback_data=f"set_prev:{index}"),
+                InlineKeyboardButton(text="➡ Далее", callback_data=f"set_next:{index}")
+            ],
+            [InlineKeyboardButton(text="💳 Купить", callback_data=f"buy_set:{index}")],
+            [InlineKeyboardButton(text="🏠 Меню", callback_data="back_menu")]
+        ])
 
     media = InputMediaPhoto(
         media=FSInputFile(s["photo"]),
@@ -284,7 +286,6 @@ if index >= len(SETS):
         media=media,
         reply_markup=kb
     )
-
     
 # =====================================================
 # PREVIOUS SET
@@ -1207,6 +1208,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
