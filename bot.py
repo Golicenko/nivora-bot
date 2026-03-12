@@ -223,14 +223,13 @@ async def sets_start(call: CallbackQuery):
 
     ])
 
-    photo = FSInputFile(s["photo"])
-
-    await call.message.answer_photo(
-        photo,
-        caption=s["text"],
+    await call.message.edit_media(
+        media=InputMediaPhoto(
+            media=FSInputFile(s["photo"]),
+            caption=s["text"]
+        ),
         reply_markup=kb
     )
-
 
 # =====================================================
 # NEXT SET
@@ -350,20 +349,6 @@ async def buy_set(call: CallbackQuery):
     )
 
 # ============================================================
-# BACK TO MAIN MENU
-# ============================================================
-
-@dp.callback_query(F.data == "back_menu")
-async def back_menu(callback: CallbackQuery):
-
-    await callback.message.delete()
-
-    await callback.message.answer(
-        "Ты сделал правильный выбор. Выбери действие ниже. 👇",
-        reply_markup=main_menu()
-    )
-
-# ============================================================
 # START
 # ============================================================
 
@@ -479,7 +464,7 @@ async def analytics_today(call: CallbackQuery):
  
     # заказы сегодня
     cursor.execute(
-    "SELECT COUNT(*) FROM orders WHERE status='new' AND date(date)=date('now')"
+    "SELECT COUNT(*) FROM orders WHERE status='new' AND date >= date('now')
 )
     orders = cursor.fetchone()[0]
 
@@ -1197,6 +1182,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
