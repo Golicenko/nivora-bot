@@ -129,7 +129,7 @@ SETS = [
 
 ⭐ Цена: 20 Stars
 """,
-"price": 20
+"price": 1
 },
 
 {
@@ -147,7 +147,7 @@ SETS = [
 
 ⭐ Цена: 35 Stars
 """,
-"price": 35
+"price": 1
 },
 
 {
@@ -171,7 +171,7 @@ SETS = [
 
 ⭐ Цена: 50 Stars
 """,
-"price": 50
+"price": 1
 }
 
 ]
@@ -632,7 +632,7 @@ description=service,
 payload=f"order_{order_id}",
 provider_token="",
 currency="XTR",
-prices=[LabeledPrice(label=service, amount=10)]
+prices=[LabeledPrice(label=service, amount=1)]
 )
 
 # ============================================================
@@ -1197,6 +1197,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
