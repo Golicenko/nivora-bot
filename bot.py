@@ -296,8 +296,8 @@ async def set_prev(call: CallbackQuery):
     index = int(call.data.split(":")[1]) - 1
 
     if index < 0:
-    index = 0
-    
+        index = 0
+
     s = SETS[index]
 
     if index == 0:
@@ -1207,6 +1207,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
