@@ -832,9 +832,9 @@ async def back_menu(call: CallbackQuery):
 или задай свой вопрос ниже 👇"""
 
     try:
-        await call.message.edit_text(text, reply_markup=main_menu())
+        await call.message.edit_caption(text, reply_markup=main_menu())
     except:
-        await call.message.answer(text, reply_markup=main_menu())
+        await call.message.edit_text(text, reply_markup=main_menu())
 
     await call.answer()
     
@@ -1209,6 +1209,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
