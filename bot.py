@@ -626,17 +626,17 @@ async def ask(call:CallbackQuery,state:FSMContext):
 async def receive_question(message: Message, state: FSMContext):
 
     if message.text.startswith("/"):
-    await state.clear()
-    await message.answer(
-"""AF Bot — Главное меню
+        await state.clear()
+        await message.answer(
+            """AF Bot — Главное меню
 
 🚘 Прокачай свой аккаунт в игре Car Parking.
 
 Выбери услугу, наборы
 или задай свой вопрос ниже 👇""",
-        reply_markup=main_menu()
-    )
-    return
+            reply_markup=main_menu()
+        )
+        return
 
     if len(message.text) > 150:
         await message.answer("❗ Максимум 150 символов")
@@ -1171,6 +1171,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
