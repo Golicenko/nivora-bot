@@ -758,10 +758,10 @@ async def payment(message: Message):
         return
 
     cursor.execute(
-        "UPDATE orders SET status='paid' WHERE id=?",
-        (order_id,)
-    )
-    db.commit()
+        "UPDATE orders SET status='new' WHERE id=?",
+    (order_id,)
+)
+db.commit()
 
     username = message.from_user.username
     buyer = f"@{username}" if username else message.from_user.full_name
@@ -1130,49 +1130,20 @@ async def reply_send(message: Message, state: FSMContext):
 @dp.callback_query(F.data=="admin_done")
 async def admin_done(call:CallbackQuery):
 
-    # все готовые
-    cursor.execute(
-        "SELECT COUNT(*) FROM orders WHERE status='done'"
-    )
-    all_done = cursor.fetchone()[0]
-
-    # готовые сегодня
+    # готовые заказы сегодня
     cursor.execute(
         "SELECT COUNT(*) FROM orders WHERE status='done' AND date(date)=date('now')"
     )
     today_done = cursor.fetchone()[0]
 
-    # список заказов
+    # готовые заказы за всё время
     cursor.execute(
-        "SELECT * FROM orders WHERE status='done' ORDER BY id DESC"
+        "SELECT COUNT(*) FROM orders WHERE status='done'"
     )
+    all_done = cursor.fetchone()[0]
 
-    orders = cursor.fetchall()
-
-    buttons = []
-
-    for o in orders:
-
-        buttons.append([
-            InlineKeyboardButton(
-                text=f"{o[3]} | {o[8]}",
-                callback_data="none"
-            )
-        ])
-
-    if not buttons:
-        buttons.append([
-            InlineKeyboardButton(
-                text="❗ Готовых заказов нет",
-                callback_data="none"
-            )
-        ])
-
-    buttons.append([
-        InlineKeyboardButton(
-            text="⬅ Назад",
-            callback_data="admin_back"
-        )
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="admin_back")]
     ])
 
     await call.message.edit_text(
@@ -1181,7 +1152,7 @@ f"""✅ Готовые заказы
 📅 Сегодня: {today_done}
 📊 За всё время: {all_done}
 """,
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons)
+        reply_markup=kb
     )
 # ============================================================
 # STATS
@@ -1248,6 +1219,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
