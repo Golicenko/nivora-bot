@@ -241,52 +241,7 @@ async def sets_start(call: CallbackQuery):
         ),
         reply_markup=kb
     )
-# =====================================================
-# NEXT SET
-# =====================================================
 
-@dp.callback_query(F.data.startswith("set_prev:"))
-async def set_prev(call: CallbackQuery):
-
-    index = int(call.data.split(":")[1]) - 1
-
-    if index < 0:
-        index = 0
-
-    s = SETS[index]
-
-    if index == 0:
-
-        kb = InlineKeyboardMarkup(inline_keyboard=[
-            [
-                InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu"),
-                InlineKeyboardButton(text="➡ Далее", callback_data="set_next:0")
-            ],
-            [InlineKeyboardButton(text="💳 Купить", callback_data="buy_set:0")],
-            [InlineKeyboardButton(text="🏠 Меню", callback_data="back_menu")]
-        ])
-
-    else:
-
-        kb = InlineKeyboardMarkup(inline_keyboard=[
-            [
-                InlineKeyboardButton(text="⬅ Назад", callback_data=f"set_prev:{index}"),
-                InlineKeyboardButton(text="➡ Далее", callback_data=f"set_next:{index}")
-            ],
-            [InlineKeyboardButton(text="💳 Купить", callback_data=f"buy_set:{index}")],
-            [InlineKeyboardButton(text="🏠 Меню", callback_data="back_menu")]
-        ])
-
-    media = InputMediaPhoto(
-        media=FSInputFile(s["photo"]),
-        caption=s["text"]
-    )
-
-    await call.message.edit_media(
-        media=media,
-        reply_markup=kb
-    )
-    
 # =====================================================
 # PREVIOUS SET
 # =====================================================
@@ -302,15 +257,16 @@ async def set_prev(call: CallbackQuery):
     s = SETS[index]
 
     if index == 0:
-
         kb = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="➡ Далее", callback_data="set_next:0")],
+            [
+                InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu"),
+                InlineKeyboardButton(text="➡ Далее", callback_data="set_next:0")
+            ],
             [InlineKeyboardButton(text="💳 Купить", callback_data="buy_set:0")],
-            [InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu")]
+            [InlineKeyboardButton(text="🏠 Меню", callback_data="back_menu")]
         ])
 
     else:
-
         kb = InlineKeyboardMarkup(inline_keyboard=[
             [
                 InlineKeyboardButton(text="⬅ Назад", callback_data=f"set_prev:{index}"),
@@ -329,7 +285,6 @@ async def set_prev(call: CallbackQuery):
         media=media,
         reply_markup=kb
     )
-
 # =====================================================
 # BUY SET
 # =====================================================
@@ -671,9 +626,17 @@ async def ask(call:CallbackQuery,state:FSMContext):
 async def receive_question(message: Message, state: FSMContext):
 
     if message.text.startswith("/"):
-        await state.clear()
-        await message.answer("🏠 Главное меню\n\nВыберите нужный раздел ниже или задайте вопрос", reply_markup=menu)
-        return
+    await state.clear()
+    await message.answer(
+"""AF Bot — Главное меню
+
+🚘 Прокачай свой аккаунт в игре Car Parking.
+
+Выбери услугу, наборы
+или задай свой вопрос ниже 👇""",
+        reply_markup=main_menu()
+    )
+    return
 
     if len(message.text) > 150:
         await message.answer("❗ Максимум 150 символов")
@@ -1208,6 +1171,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
