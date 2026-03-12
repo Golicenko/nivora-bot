@@ -778,9 +778,11 @@ async def payment(message: Message):
     price = order[6]
     date = order[8]
 
+   
+  
     # чек пользователю
-     receipt = await message.answer(
-f"""🧾 ЧЕК ОБ ОПЛАТЕ
+    receipt = await message.answer(
+        f"""🧾 ЧЕК ОБ ОПЛАТЕ
 
 📦 Услуга:
 {service}
@@ -799,7 +801,8 @@ f"""🧾 ЧЕК ОБ ОПЛАТЕ
 ✅ Оплата прошла успешно!
 
 📩 Администратор уже получил ваш заказ.
-Ожидайте выполнения услуги."""
+Ожидайте выполнения услуги.
+"""
     )
 
     # кнопка принять
@@ -809,26 +812,26 @@ f"""🧾 ЧЕК ОБ ОПЛАТЕ
         ]
     )
 
-cursor.execute(
-    "UPDATE orders SET status='new', text=text WHERE id=?",
-    (order_id,)
-)
-db.commit()
+    cursor.execute(
+        "UPDATE orders SET status='new' WHERE id=?",
+        (order_id,)
+    )
+    db.commit()
 
     # сообщение админу
     await bot.send_message(
         ADMIN_ID,
-f"""📥 Новый заказ
+        f"""📥 Новый заказ
 
 👤 Покупатель: {buyer}
 📦 Услуга: {service}
 ⭐ Цена: {price} Stars
 🕒 Дата: {date}
 
-Нажмите "Принять", чтобы добавить заказ в новые.""",
+Нажмите "Принять", чтобы добавить заказ в новые."""
+        ,
         reply_markup=kb
     )
-
 # ============================================================
 # TAKE ORDER
 # ============================================================
@@ -1239,6 +1242,7 @@ async def main():
 
 if __name__=="__main__":
     asyncio.run(main())
+
 
 
 
