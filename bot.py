@@ -897,6 +897,19 @@ async def admin(message: Message):
         reply_markup=admin_menu()
     )
 
+# ============================================================
+# DOWNLOAD DATABASE
+# ============================================================
+
+@dp.message(Command("db"))
+async def send_db(message: Message):
+
+    if message.from_user.id != ADMIN_ID:
+        return
+
+    file = FSInputFile("bot.db")
+    await message.answer_document(file)
+    
 # ============================
 # BROADCAST
 # ============================
