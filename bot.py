@@ -596,16 +596,16 @@ async def support(call: CallbackQuery, state: FSMContext):
     )
 
     await call.message.edit_text(
-"""💬 Написать в поддержку
+"""💬 Поддержка
 
-Пожалуйста опишите проблему максимально подробно.
+Напишите ваше сообщение прямо в чат.
 
-Администратор ответит вам как можно быстрее.""",
+Опишите проблему максимально подробно,
+чтобы мы могли быстрее помочь.""",
         reply_markup=kb
     )
 
     await state.set_state(AskState.waiting_question)
-
 @dp.message(AskState.waiting_question)
 async def receive_question(message: Message, state: FSMContext):
 
@@ -619,7 +619,7 @@ async def receive_question(message: Message, state: FSMContext):
         ]
     )
 
-    await bot.send_message(
+    admin_msg = await bot.send_message(
         ADMIN_ID,
         f"""📩 Сообщение в поддержку
 
@@ -632,7 +632,8 @@ async def receive_question(message: Message, state: FSMContext):
         reply_markup=kb
     )
 
-    await message.answer(
+    # сообщение пользователю
+    sent = await message.answer(
 """✅ Сообщение отправлено в поддержку.
 
 Ожидайте ответа администратора."""
@@ -640,14 +641,18 @@ async def receive_question(message: Message, state: FSMContext):
 
     await state.clear()
 
-    await message.answer(
-"""AF Bot — Главное меню
+    # очищаем чат через 2 секунды
+    await asyncio.sleep(2)
 
-🚘 Прокачай свой аккаунт в игре Car Parking.
+    try:
+        await message.delete()
+    except:
+        pass
 
-Выбери услугу ниже 👇""",
-        reply_markup=main_menu()
-    )
+    try:
+        await sent.delete()
+    except:
+        pass
 
 # ============================================================
 # PAYMENT
@@ -1187,23 +1192,25 @@ async def support_send(message: Message, state: FSMContext):
     data = await state.get_data()
     user_id = data.get("user_id")
 
-    await bot.send_message(
+    sent = await bot.send_message(
         user_id,
         f"""📩 Ответ поддержки
 
-{message.text}
-
-⬇ Нажмите кнопку ниже чтобы вернуться в меню""",
-        reply_markup=InlineKeyboardMarkup(
-            inline_keyboard=[
-                [InlineKeyboardButton(text="🏠 Меню", callback_data="back")]
-            ]
-        )
+{message.text}"""
     )
 
-    await message.answer("✅ Ответ отправлен")
-
     await state.clear()
+
+    # удаляем сообщение админа
+    try:
+        await message.delete()
+    except:
+        pass
+
+    await bot.send_message(
+        ADMIN_ID,
+        "✅ Ответ отправлен"
+    )
 
 @dp.callback_query(F.data=="none")
 async def none(call: CallbackQuery):
