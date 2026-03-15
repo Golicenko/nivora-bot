@@ -100,18 +100,6 @@ class BroadcastState(StatesGroup):
 # DATA
 # ============================================================
 
-POPULAR = [
-"📥 Как скачать Game Guardian",
-"⚙️ Как установить Game Guardian (Android 5-14)",
-"📦 Как скачать виртуальное пространство",
-"🛠 Как настроить Game Guardian",
-"📘 Как пользоваться Game Guardian",
-"📱 Что делать если Android 15-16",
-"📜 Как скачать скрипт",
-"📂 Как установить скрипт",
-"🎮 Как пользоваться скриптом"
-]
-
 SERVICES = [
 "🪙 Коины — 30.000",
 "💰 Вирты — 50.000.000",
@@ -205,9 +193,7 @@ def main_menu():
 
         [InlineKeyboardButton(text="🚘 Услуги в игре", callback_data="services")],
 
-        [InlineKeyboardButton(text="✍️ Задать свой вопрос", callback_data="ask")],
-
-        [InlineKeyboardButton(text="🤩 Популярные вопросы", callback_data="popular")]
+        [InlineKeyboardButton(text="💬 Написать в поддержку", callback_data="support")]
 
     ])
 
@@ -544,59 +530,6 @@ f"""📊 Аналитика
     )
     
 # ============================================================
-# POPULAR QUESTIONS
-# ============================================================
-
-@dp.callback_query(F.data=="popular")
-async def popular(call:CallbackQuery):
-
-    log_visit(call.from_user.id)
-
-    buttons=[]
-    for i,q in enumerate(POPULAR):
-        buttons.append([InlineKeyboardButton(text=q,callback_data=f"pq_{i}")])
-
-    buttons.append([InlineKeyboardButton(text="⬅ Назад",callback_data="back")])
-
-    await call.message.edit_text(
-        "🤩 Популярные вопросы",
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons)
-    )
-
-@dp.callback_query(F.data.startswith("pq_"))
-async def buy_pop(call:CallbackQuery):
-
-    index=int(call.data.split("_")[1])
-    question=POPULAR[index]
-
-    cursor.execute("""
-INSERT INTO orders(user_id,username,name,text,type,price,status,date)
-VALUES(?,?,?,?,?,?,?,?)
-""",(
-call.from_user.id,
-call.from_user.username,
-call.from_user.first_name,
-question,
-"popular",
-1,
-"waiting_payment",
-datetime.now().strftime("%Y-%m-%d %H:%M")
-))
-
-    order_id=cursor.lastrowid
-    db.commit()
-
-    await bot.send_invoice(
-        call.from_user.id,
-        title="Ответ на вопрос",
-        description=question,
-        payload=f"order_{order_id}",
-        provider_token="",
-        currency="XTR",
-        prices=[LabeledPrice(label="Ответ",amount=1)]
-    )
-
-# ============================================================
 # SERVICES
 # ============================================================
 
@@ -653,10 +586,8 @@ prices=[LabeledPrice(label=service, amount=10)]
 # ASK QUESTION
 # ============================================================
 
-@dp.callback_query(F.data=="ask")
-async def ask(call:CallbackQuery,state:FSMContext):
-
-    log_visit(call.from_user.id)
+@dp.callback_query(F.data=="support")
+async def support(call: CallbackQuery, state: FSMContext):
 
     kb = InlineKeyboardMarkup(
         inline_keyboard=[
@@ -665,12 +596,11 @@ async def ask(call:CallbackQuery,state:FSMContext):
     )
 
     await call.message.edit_text(
-"""Здравствуйте я Максим.
+"""💬 Написать в поддержку
 
-Пожалуйста напишите свой вопрос максимально понятно
-чтобы мы могли ответить максимально подробно.
+Пожалуйста опишите проблему максимально подробно.
 
-Максимум 150 символов""",
+Администратор ответит вам как можно быстрее.""",
         reply_markup=kb
     )
 
@@ -679,50 +609,44 @@ async def ask(call:CallbackQuery,state:FSMContext):
 @dp.message(AskState.waiting_question)
 async def receive_question(message: Message, state: FSMContext):
 
-    if message.text.startswith("/"):
-        await state.clear()
-        await message.answer(
-            """AF Bot — Главное меню
+    user_id = message.from_user.id
+    username = message.from_user.username
+    text = message.text
 
-🚘 Прокачай свой аккаунт в игре Car Parking.
+    kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="✉️ Ответить", callback_data=f"reply_support_{user_id}")]
+        ]
+    )
 
-Выбери услугу, наборы
-или задай свой вопрос ниже 👇""",
-            reply_markup=main_menu()
-        )
-        return
+    await bot.send_message(
+        ADMIN_ID,
+        f"""📩 Сообщение в поддержку
 
-    if len(message.text) > 150:
-        await message.answer("❗ Максимум 150 символов")
-        return
+👤 Пользователь: @{username}
+🆔 ID: {user_id}
 
-    cursor.execute("""
-    INSERT INTO orders(user_id,username,name,text,type,price,status,date)
-    VALUES(?,?,?,?,?,?,?,?)
-    """,(
-        message.from_user.id,
-        message.from_user.username,
-        message.from_user.first_name,
-        message.text,
-        "question",
-        1,
-        "waiting_payment",
-        datetime.now().strftime("%Y-%m-%d %H:%M")
-    ))
+💬 Сообщение:
+{text}
+""",
+        reply_markup=kb
+    )
 
-    order_id = cursor.lastrowid
-    db.commit()
+    await message.answer(
+"""✅ Сообщение отправлено в поддержку.
+
+Ожидайте ответа администратора."""
+    )
 
     await state.clear()
 
-    await bot.send_invoice(
-        message.from_user.id,
-        title="Ответ на вопрос",
-        description=message.text,
-        payload=f"order_{order_id}",
-        provider_token="",
-        currency="XTR",
-        prices=[LabeledPrice(label="Ответ", amount=1)]
+    await message.answer(
+"""AF Bot — Главное меню
+
+🚘 Прокачай свой аккаунт в игре Car Parking.
+
+Выбери услугу ниже 👇""",
+        reply_markup=main_menu()
     )
 
 # ============================================================
@@ -1237,6 +1161,50 @@ f"""📊 Статистика ({title})
 """,
 reply_markup=kb
 )
+
+class SupportReply(StatesGroup):
+    waiting_text = State()
+
+
+@dp.callback_query(F.data.startswith("reply_support_"))
+async def support_reply(call: CallbackQuery, state: FSMContext):
+
+    user_id = int(call.data.split("_")[2])
+
+    await state.update_data(user_id=user_id)
+
+    await bot.send_message(
+        ADMIN_ID,
+        "✍️ Напишите ответ пользователю"
+    )
+
+    await state.set_state(SupportReply.waiting_text)
+
+
+@dp.message(SupportReply.waiting_text)
+async def support_send(message: Message, state: FSMContext):
+
+    data = await state.get_data()
+    user_id = data.get("user_id")
+
+    await bot.send_message(
+        user_id,
+        f"""📩 Ответ поддержки
+
+{message.text}
+
+⬇ Нажмите кнопку ниже чтобы вернуться в меню""",
+        reply_markup=InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text="🏠 Меню", callback_data="back")]
+            ]
+        )
+    )
+
+    await message.answer("✅ Ответ отправлен")
+
+    await state.clear()
+
 @dp.callback_query(F.data=="none")
 async def none(call: CallbackQuery):
     await call.answer("Заказов нет")
