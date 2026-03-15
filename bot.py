@@ -461,7 +461,6 @@ def trust_menu():
 # ============================================================
 # BACK
 # ============================================================
-
 @dp.callback_query(F.data == "back")
 async def back(call: CallbackQuery):
 
@@ -469,16 +468,6 @@ async def back(call: CallbackQuery):
         await call.message.delete()
     except:
         pass
-
-    await call.answer()
-"""AF Bot — Главное меню
-
-🚘 Прокачай свой аккаунт в игре Car Parking.
-
-Выбери услугу, наборы
-или задай свой вопрос ниже 👇""",
-        reply_markup=main_menu()
-    )
 
     await call.answer()
 
