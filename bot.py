@@ -1177,7 +1177,8 @@ async def support_reply(call: CallbackQuery, state: FSMContext):
 
     await state.update_data(
         user_id=user_id,
-        reply_msg=msg.message_id
+        reply_msg=msg.message_id,
+        support_msg=call.message.message_id
     )
 
     await state.set_state(SupportReply.waiting_text)
@@ -1189,25 +1190,40 @@ async def support_send(message: Message, state: FSMContext):
 
     user_id = data.get("user_id")
     reply_msg = data.get("reply_msg")
+    support_msg = data.get("support_msg")
 
-    await bot.send_message(
+    kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="⬅ Назад", callback_data="back")]
+        ]
+    )
+
+    # отправляем ответ пользователю
+    sent = await bot.send_message(
         user_id,
         f"""📩 Ответ поддержки
 
-{message.text}"""
+{message.text}""",
+        reply_markup=kb
     )
 
     await state.clear()
 
-    # удаляем сообщение админа с текстом
+    # удаляем ответ админа
     try:
         await message.delete()
     except:
         pass
 
-    # удаляем "Напишите ответ"
+    # удаляем сообщение "Напишите ответ"
     try:
         await bot.delete_message(ADMIN_ID, reply_msg)
+    except:
+        pass
+
+    # удаляем сообщение поддержки
+    try:
+        await bot.delete_message(ADMIN_ID, support_msg)
     except:
         pass
 
