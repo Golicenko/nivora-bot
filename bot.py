@@ -461,13 +461,19 @@ def trust_menu():
 # ============================================================
 # BACK
 # ============================================================
+
 @dp.callback_query(F.data == "back")
 async def back(call: CallbackQuery):
 
-    try:
-        await call.message.delete()
-    except:
-        pass
+    await call.message.edit_text(
+"""AF Bot — Главное меню
+
+🚘 Прокачай свой аккаунт в игре Car Parking.
+
+Выбери услугу, наборы
+или задай свой вопрос ниже 👇""",
+        reply_markup=main_menu()
+    )
 
     await call.answer()
 
@@ -1188,7 +1194,7 @@ async def support_send(message: Message, state: FSMContext):
 
     kb = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="⬅ Назад", callback_data="back")]
+            [InlineKeyboardButton(text="⬅ Закрыть", callback_data="close_support")]
         ]
     )
 
@@ -1220,7 +1226,17 @@ async def support_send(message: Message, state: FSMContext):
         await bot.delete_message(ADMIN_ID, support_msg)
     except:
         pass
+        
+@dp.callback_query(F.data == "close_support")
+async def close_support(call: CallbackQuery):
 
+    try:
+        await call.message.delete()
+    except:
+        pass
+
+    await call.answer()
+    
 @dp.callback_query(F.data=="none")
 async def none(call: CallbackQuery):
     await call.answer("Заказов нет")
