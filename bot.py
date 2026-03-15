@@ -66,6 +66,25 @@ def create_order(user_id, username, name, text, type, price):
     db.commit()
 
     return cursor.lastrowid
+
+return cursor.lastrowid
+
+# ФУНКЦИЯ ЗАПИСИ АКТИВНОСТИ
+def log_visit(user_id):
+
+    cursor.execute(
+        "INSERT INTO visits(user_id,date) VALUES(?,?)",
+        (user_id, datetime.now().strftime("%Y-%m-%d"))
+    )
+
+    db.commit()
+
+def log_visit(user_id):
+    cursor.execute(
+        "INSERT INTO visits(user_id,date) VALUES(?,?)",
+        (user_id, datetime.now().strftime("%Y-%m-%d"))
+    )
+    db.commit()
 # ============================================================
 # STATES
 # ============================================================
@@ -216,6 +235,8 @@ def analytics_menu():
 
 @dp.callback_query(F.data == "sets")
 async def sets_start(call: CallbackQuery):
+
+    log_visit(call.from_user.id)
 
     index = 0
     s = SETS[index]
@@ -497,18 +518,27 @@ async def analytics(call: CallbackQuery):
 
 @dp.callback_query(F.data == "analytics_today")
 async def analytics_today(call: CallbackQuery):
- 
-    # заказы сегодня
-    cursor.execute(
-    "SELECT COUNT(*) FROM orders WHERE status='new' AND date >= date('now')"
-)
-    orders = cursor.fetchone()[0]
 
-    # посещения сегодня
-    cursor.execute(
-        "SELECT COUNT(*) FROM visits WHERE date(date)=date('now')"
-    )
-    visits = cursor.fetchone()[0]
+    # пользователи всего
+    cursor.execute("SELECT COUNT(*) FROM users")
+    users = cursor.fetchone()[0]
+
+    # активные сегодня (уникальные)
+    cursor.execute("""
+    SELECT COUNT(DISTINCT user_id)
+    FROM visits
+    WHERE date(date)=date('now')
+    """)
+    active_today = cursor.fetchone()[0]
+
+    # заказы сегодня (оплаченные)
+    cursor.execute("""
+    SELECT COUNT(*)
+    FROM orders
+    WHERE status='new'
+    AND date(date)=date('now')
+    """)
+    orders_today = cursor.fetchone()[0]
 
     kb = InlineKeyboardMarkup(
         inline_keyboard=[
@@ -517,14 +547,17 @@ async def analytics_today(call: CallbackQuery):
     )
 
     await call.message.edit_text(
-        f"""📊 Сегодня
+f"""📊 Статистика сегодня
 
-📦 Заказы: {orders}
-👥 Посещения: {visits}
+👥 Пользователей: {users}
+
+🔥 Активных сегодня: {active_today}
+
+📦 Заказов сегодня: {orders_today}
 """,
         reply_markup=kb
     )
-
+    
 # ====================================================
 # ANALYTICS ALL TIME
 # ====================================================
@@ -560,6 +593,8 @@ async def analytics_all(call: CallbackQuery):
 
 @dp.callback_query(F.data=="popular")
 async def popular(call:CallbackQuery):
+
+    log_visit(call.from_user.id)
 
     buttons=[]
     for i,q in enumerate(POPULAR):
@@ -612,6 +647,8 @@ datetime.now().strftime("%Y-%m-%d %H:%M")
 @dp.callback_query(F.data=="services")
 async def services(call:CallbackQuery):
 
+    log_visit(call.from_user.id)
+
     buttons=[]
     for i,s in enumerate(SERVICES):
         buttons.append([InlineKeyboardButton(text=s,callback_data=f"service_{i}")])
@@ -662,6 +699,8 @@ prices=[LabeledPrice(label=service, amount=10)]
 
 @dp.callback_query(F.data=="ask")
 async def ask(call:CallbackQuery,state:FSMContext):
+
+    log_visit(call.from_user.id)
 
     kb = InlineKeyboardMarkup(
         inline_keyboard=[
