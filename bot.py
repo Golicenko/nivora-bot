@@ -67,8 +67,6 @@ def create_order(user_id, username, name, text, type, price):
 
     return cursor.lastrowid
 
-return cursor.lastrowid
-
 # ФУНКЦИЯ ЗАПИСИ АКТИВНОСТИ
 def log_visit(user_id):
 
