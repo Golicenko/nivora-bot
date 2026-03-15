@@ -77,12 +77,6 @@ def log_visit(user_id):
 
     db.commit()
 
-def log_visit(user_id):
-    cursor.execute(
-        "INSERT INTO visits(user_id,date) VALUES(?,?)",
-        (user_id, datetime.now().strftime("%Y-%m-%d"))
-    )
-    db.commit()
 # ============================================================
 # STATES
 # ============================================================
@@ -985,7 +979,7 @@ async def view_order(call: CallbackQuery):
 # REPLY
 # =====================================================
 
-@dp.callback_query(F.data.startswith("reply_"))
+@dp.callback_query(F.data.startswith("reply_") & ~F.data.startswith("reply_support_"))
 async def reply_start(call: CallbackQuery, state: FSMContext):
 
     order_id = call.data.split("_")[1]
@@ -1176,23 +1170,27 @@ async def support_reply(call: CallbackQuery, state: FSMContext):
 
     user_id = int(call.data.split("_")[2])
 
-    await state.update_data(user_id=user_id)
-
-    await bot.send_message(
+    msg = await bot.send_message(
         ADMIN_ID,
         "✍️ Напишите ответ пользователю"
     )
 
-    await state.set_state(SupportReply.waiting_text)
+    await state.update_data(
+        user_id=user_id,
+        reply_msg=msg.message_id
+    )
 
+    await state.set_state(SupportReply.waiting_text)
 
 @dp.message(SupportReply.waiting_text)
 async def support_send(message: Message, state: FSMContext):
 
     data = await state.get_data()
-    user_id = data.get("user_id")
 
-    sent = await bot.send_message(
+    user_id = data.get("user_id")
+    reply_msg = data.get("reply_msg")
+
+    await bot.send_message(
         user_id,
         f"""📩 Ответ поддержки
 
@@ -1201,16 +1199,17 @@ async def support_send(message: Message, state: FSMContext):
 
     await state.clear()
 
-    # удаляем сообщение админа
+    # удаляем сообщение админа с текстом
     try:
         await message.delete()
     except:
         pass
 
-    await bot.send_message(
-        ADMIN_ID,
-        "✅ Ответ отправлен"
-    )
+    # удаляем "Напишите ответ"
+    try:
+        await bot.delete_message(ADMIN_ID, reply_msg)
+    except:
+        pass
 
 @dp.callback_query(F.data=="none")
 async def none(call: CallbackQuery):
