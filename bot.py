@@ -176,6 +176,105 @@ SETS = [
 }
 
 ]
+
+# =====================================================
+# GAMEGUARDIAN TRAINING
+# =====================================================
+
+GG_TRAINING = [
+
+{
+"name": "📱 Обучение GameGuardian (Android 5-14)",
+"photo": "photo1.jpg",
+"text": """📱 Обучение GameGuardian
+
+Подходит для Android 5-14.
+
+Я обучу вас с нуля пользоваться
+GameGuardian и виртуальным пространством.
+
+Вы узнаете:
+
+• как скачать GameGuardian
+• как установить виртуальное пространство
+• как запускать игру
+• как искать значения
+• как делать модификации
+
+Пошаговое обучение без опыта.
+
+⭐ Цена: 150 Stars
+""",
+"price": 150,
+"url": "https://golicenko.github.io/nivora-bot/android5-14-guide.html"
+},
+
+{
+"name": "📱 Обучение GameGuardian (Android 15-16)",
+"photo": "photo2.jpg",
+"text": """📱 Обучение GameGuardian
+
+Подходит для Android 15-16.
+
+В этой версии Android есть ограничения,
+поэтому используется другой способ запуска.
+
+Я покажу:
+
+• как установить GameGuardian
+• как настроить виртуальное пространство
+• как обходить защиту Android
+• как искать значения
+• как делать модификации
+
+Полное обучение пошагово.
+
+⭐ Цена: 250 Stars
+""",
+"price": 250,
+"url": "https://golicenko.github.io/nivora-bot/guide-android-15-16.html"
+}
+
+]
+
+@dp.callback_query(F.data.startswith("gg_next:"))
+async def gg_next(call: CallbackQuery):
+
+    index = int(call.data.split(":")[1]) + 1
+
+    if index >= len(GG_TRAINING):
+        index = len(GG_TRAINING) - 1
+
+    g = GG_TRAINING[index]
+
+    buttons = []
+
+    if index == 1:
+        buttons.append([
+            InlineKeyboardButton(text="⬅ Назад", callback_data="gg_prev:1")
+        ])
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        *buttons,
+        [InlineKeyboardButton(text="💳 Купить", callback_data=f"buy_gg:{index}")],
+        [
+            InlineKeyboardButton(
+                text="📖 Полное описание",
+                web_app=WebAppInfo(url=g["url"])
+            )
+        ],
+        [InlineKeyboardButton(text="🏠 Меню", callback_data="back_menu")]
+    ])
+
+    media = InputMediaPhoto(
+        media=FSInputFile(g["photo"]),
+        caption=g["text"]
+    )
+
+    await call.message.edit_media(
+        media=media,
+        reply_markup=kb
+    )
 # ============================================================
 # MENUS
 # ============================================================
@@ -186,6 +285,8 @@ def main_menu():
         [InlineKeyboardButton(text="🎁 Наборы услуг (выгоднее)", callback_data="sets")],
 
         [InlineKeyboardButton(text="🚘 Услуги в игре", callback_data="services")],
+
+        [InlineKeyboardButton(text="🎓 Обучение GameGuardian", callback_data="gg_training")],
 
         [InlineKeyboardButton(text="💬 Написать в поддержку", callback_data="support")]
 
@@ -200,7 +301,153 @@ def admin_menu():
 
     ])
     
+# =====================================================
+# GAMEGUARDIAN TRAINING START
+# =====================================================
 
+@dp.callback_query(F.data == "gg_training")
+async def gg_training(call: CallbackQuery):
+
+    index = 0
+    g = GG_TRAINING[index]
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+
+        [
+            InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu"),
+            InlineKeyboardButton(text="➡ Далее", callback_data="gg_next:0")
+        ],
+
+        [InlineKeyboardButton(text="💳 Купить", callback_data="buy_gg:0")],
+
+        [
+            InlineKeyboardButton(
+                text="📖 Полное описание",
+                web_app=WebAppInfo(url=g["url"])
+            )
+        ],
+
+        [InlineKeyboardButton(text="🏠 Меню", callback_data="back_menu")]
+
+    ])
+
+    await call.message.edit_media(
+        media=InputMediaPhoto(
+            media=FSInputFile(g["photo"]),
+            caption=g["text"]
+        ),
+        reply_markup=kb
+    )
+
+@dp.callback_query(F.data.startswith("gg_next:"))
+async def gg_next(call: CallbackQuery):
+
+    index = int(call.data.split(":")[1]) + 1
+
+    if index >= len(GG_TRAINING):
+        index = len(GG_TRAINING) - 1
+
+    g = GG_TRAINING[index]
+
+    buttons = []
+
+    if index == 1:
+        buttons.append([
+            InlineKeyboardButton(text="⬅ Назад", callback_data="gg_prev:1")
+        ])
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        *buttons,
+        [InlineKeyboardButton(text="💳 Купить", callback_data=f"buy_gg:{index}")],
+        [
+            InlineKeyboardButton(
+                text="📖 Полное описание",
+                web_app=WebAppInfo(url=g["url"])
+            )
+        ],
+        [InlineKeyboardButton(text="🏠 Меню", callback_data="back_menu")]
+    ])
+
+    media = InputMediaPhoto(
+        media=FSInputFile(g["photo"]),
+        caption=g["text"]
+    )
+
+    await call.message.edit_media(
+        media=media,
+        reply_markup=kb
+    )
+
+@dp.callback_query(F.data.startswith("gg_prev:"))
+async def gg_prev(call: CallbackQuery):
+
+    index = int(call.data.split(":")[1]) - 1
+
+    if index < 0:
+        index = 0
+
+    g = GG_TRAINING[index]
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+
+        [
+            InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu"),
+            InlineKeyboardButton(text="➡ Далее", callback_data="gg_next:0")
+        ],
+
+        [InlineKeyboardButton(text="💳 Купить", callback_data=f"buy_gg:{index}")],
+
+        [
+            InlineKeyboardButton(
+                text="📖 Полное описание",
+                web_app=WebAppInfo(url=g["url"])
+            )
+        ],
+
+        [InlineKeyboardButton(text="🏠 Меню", callback_data="back_menu")]
+
+    ])
+
+    media = InputMediaPhoto(
+        media=FSInputFile(g["photo"]),
+        caption=g["text"]
+    )
+
+    await call.message.edit_media(
+        media=media,
+        reply_markup=kb
+    )
+
+@dp.callback_query(F.data.startswith("buy_gg:"))
+async def buy_gg(call: CallbackQuery):
+
+    index = int(call.data.split(":")[1])
+
+    g = GG_TRAINING[index]
+
+    name = g["name"]
+    price = g["price"]
+
+    order_id = create_order(
+        call.from_user.id,
+        call.from_user.username,
+        call.from_user.first_name,
+        name,
+        "training",
+        price
+    )
+
+    prices = [LabeledPrice(label=name, amount=price)]
+
+    await bot.send_invoice(
+        call.from_user.id,
+        title=name,
+        description="Покупка обучения GameGuardian",
+        payload=f"order_{order_id}",
+        provider_token="",
+        currency="XTR",
+        prices=prices
+    )
 # =====================================================
 # SETS START
 # =====================================================
