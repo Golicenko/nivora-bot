@@ -217,15 +217,9 @@ def admin_menu():
         [InlineKeyboardButton(text="📥 Новые заказы", callback_data="admin_new")],
         [InlineKeyboardButton(text="✅ Готовые", callback_data="admin_done")],
         [InlineKeyboardButton(text="📊 Аналитика", callback_data="analytics")]
-    ])
 
-
-def analytics_menu():
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="📅 Сегодня", callback_data="analytics_today")],
-        [InlineKeyboardButton(text="📊 Все время", callback_data="analytics_all")],
-        [InlineKeyboardButton(text="⬅ Назад", callback_data="admin_back")]
     ])
+    
 
 # =====================================================
 # SETS START
@@ -506,22 +500,15 @@ async def back(call: CallbackQuery):
 # ============================================================
 # ANALYTICS TODAY
 # ============================================================
+
 @dp.callback_query(F.data == "analytics")
 async def analytics(call: CallbackQuery):
 
-    await call.message.edit_text(
-        "📊 Аналитика",
-        reply_markup=analytics_menu()
-    )
-
-@dp.callback_query(F.data == "analytics_today")
-async def analytics_today(call: CallbackQuery):
-
-    # пользователи всего
+    # пользователи
     cursor.execute("SELECT COUNT(*) FROM users")
     users = cursor.fetchone()[0]
 
-    # активные сегодня (уникальные)
+    # активные сегодня
     cursor.execute("""
     SELECT COUNT(DISTINCT user_id)
     FROM visits
@@ -540,12 +527,12 @@ async def analytics_today(call: CallbackQuery):
 
     kb = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="⬅ Назад", callback_data="analytics")]
+            [InlineKeyboardButton(text="⬅ Назад", callback_data="admin_back")]
         ]
     )
 
     await call.message.edit_text(
-f"""📊 Статистика сегодня
+f"""📊 Аналитика
 
 👥 Пользователей: {users}
 
@@ -556,35 +543,6 @@ f"""📊 Статистика сегодня
         reply_markup=kb
     )
     
-# ====================================================
-# ANALYTICS ALL TIME
-# ====================================================
-
-@dp.callback_query(F.data == "analytics_all")
-async def analytics_all(call: CallbackQuery):
-
-    cursor.execute(
-        "SELECT COUNT(*) FROM orders WHERE status='new'"
-    )
-    orders = cursor.fetchone()[0]
-
-    cursor.execute(
-        "SELECT COUNT(*) FROM visits"
-    )
-    visits = cursor.fetchone()[0]
-
-    kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="⬅ Назад", callback_data="analytics")]
-    ])
-
-    await call.message.edit_text(
-        f"""📊 Все время
-
-📦 Заказы: {orders}
-👥 Посещения: {visits}
-""",
-        reply_markup=kb
-    )
 # ============================================================
 # POPULAR QUESTIONS
 # ============================================================
