@@ -917,6 +917,8 @@ async def checkout(pre_checkout_query: PreCheckoutQuery):
 @dp.message(F.successful_payment)
 async def payment(message: Message):
 
+    global ADMIN_ORDERS_COUNT
+
     payload = message.successful_payment.invoice_payload
 
     try:
@@ -949,10 +951,8 @@ async def payment(message: Message):
     price = order[6]
     date = order[8]
 
-   
-  
     # чек пользователю
-    receipt = await message.answer(
+    await message.answer(
         f"""🧾 ЧЕК ОБ ОПЛАТЕ
 
 📦 Услуга:
@@ -976,23 +976,12 @@ async def payment(message: Message):
 """
     )
 
-    # кнопка принять
-    kb = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(text="✅ Принять", callback_data=f"take_{order_id}")]
-        ]
-    )
+    # увеличиваем счетчик заказов
+    ADMIN_ORDERS_COUNT += 1
 
-    cursor.execute(
-        "UPDATE orders SET status='new' WHERE id=?",
-        (order_id,)
-    )
-    db.commit()
+    # обновляем сообщение админа
+    await update_admin_orders()
 
-global ADMIN_ORDERS_COUNT
-ADMIN_ORDERS_COUNT += 1
-
-await update_admin_orders()
 
 # ============================================================
 # TAKE ORDER
