@@ -292,18 +292,12 @@ async def gg_next(call: CallbackQuery):
 def main_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
 
-        [
-            InlineKeyboardButton(text="🔥 Наборы", callback_data="sets"),
-            InlineKeyboardButton(text="🚘 Услуги", callback_data="services")
-        ],
-
-        [
-            InlineKeyboardButton(text="🎓 Обучение", callback_data="gg_training"),
-            InlineKeyboardButton(text="💬 Поддержка", callback_data="support")
-        ]
-
-    ])
-
+    [
+    [InlineKeyboardButton(text="🎁 Наборы услуг (выгоднее)", callback_data="sets")],
+    [InlineKeyboardButton(text="🚘 Услуги в игре", callback_data="services")],
+    [InlineKeyboardButton(text="🎓 Обучение GameGuardian", callback_data="gg_training")],
+    [InlineKeyboardButton(text="💬 Написать в поддержку", callback_data="support")]
+]
 
 def admin_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
