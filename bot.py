@@ -295,8 +295,9 @@ def admin_menu():
     [InlineKeyboardButton(text="🚘 Услуги в игре", callback_data="services")],
     [InlineKeyboardButton(text="🎓 Обучение GameGuardian", callback_data="gg_training")],
     [InlineKeyboardButton(text="💬 Написать в поддержку", callback_data="support")]
-]
 
+    ])
+        
 def admin_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📥 Новые заказы", callback_data="admin_new")],
