@@ -21,6 +21,13 @@ from aiogram.fsm.storage.memory import MemoryStorage
 TOKEN = "8793368680:AAHt-SAaKjCx7ZcPyGPovDYHiXtYnflaNCk"
 ADMIN_ID = 6277321336
 
+# ============================================================
+# ADMIN ORDERS COUNTER
+# ============================================================
+
+ADMIN_ORDERS_MESSAGE_ID = None
+ADMIN_ORDERS_COUNT = 0
+
 bot = Bot(TOKEN)
 dp = Dispatcher(storage=MemoryStorage())
 
@@ -982,20 +989,11 @@ async def payment(message: Message):
     )
     db.commit()
 
-    # сообщение админу
-    await bot.send_message(
-        ADMIN_ID,
-        f"""📥 Новый заказ
+  global ADMIN_ORDERS_COUNT
+ADMIN_ORDERS_COUNT += 1
 
-👤 Покупатель: {buyer}
-📦 Услуга: {service}
-⭐ Цена: {price} Stars
-🕒 Дата: {date}
+await update_admin_orders()
 
-Нажмите "Принять", чтобы добавить заказ в новые."""
-        ,
-        reply_markup=kb
-    )
 # ============================================================
 # TAKE ORDER
 # ============================================================
@@ -1015,6 +1013,30 @@ async def take_order(call: CallbackQuery):
     await call.message.delete()
 
     await call.answer("Заказ добавлен в новые")
+
+@dp.callback_query(F.data == "accept_all_orders")
+async def accept_all_orders(call: CallbackQuery):
+
+    global ADMIN_ORDERS_COUNT
+    global ADMIN_ORDERS_MESSAGE_ID
+
+    cursor.execute(
+        "UPDATE orders SET status='new' WHERE status='new'"
+    )
+    db.commit()
+
+    try:
+        await bot.delete_message(
+            ADMIN_ID,
+            ADMIN_ORDERS_MESSAGE_ID
+        )
+    except:
+        pass
+
+    ADMIN_ORDERS_MESSAGE_ID = None
+    ADMIN_ORDERS_COUNT = 0
+
+    await call.answer("Все заказы приняты")
 
 # ============================================================
 # BACK TO MENU
@@ -1137,6 +1159,43 @@ async def broadcast_send(message: Message, state: FSMContext):
     )
 
     await state.clear()
+
+# ============================================================
+# ADMIN ORDER NOTIFICATION
+# ============================================================
+
+async def update_admin_orders():
+
+    global ADMIN_ORDERS_MESSAGE_ID
+    global ADMIN_ORDERS_COUNT
+
+    kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="✅ Принять", callback_data="accept_all_orders")]
+        ]
+    )
+
+    text = f"📥 Новые заказы: {ADMIN_ORDERS_COUNT}"
+
+    if ADMIN_ORDERS_MESSAGE_ID is None:
+
+        msg = await bot.send_message(
+            ADMIN_ID,
+            text,
+            reply_markup=kb
+        )
+
+        ADMIN_ORDERS_MESSAGE_ID = msg.message_id
+
+    else:
+
+        await bot.edit_message_text(
+            text,
+            ADMIN_ID,
+            ADMIN_ORDERS_MESSAGE_ID,
+            reply_markup=kb
+        )
+
 # ============================================================
 # NEW ORDERS
 # ============================================================
