@@ -989,7 +989,7 @@ async def payment(message: Message):
     )
     db.commit()
 
-  global ADMIN_ORDERS_COUNT
+global ADMIN_ORDERS_COUNT
 ADMIN_ORDERS_COUNT += 1
 
 await update_admin_orders()
