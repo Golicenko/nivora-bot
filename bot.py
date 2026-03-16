@@ -292,13 +292,13 @@ async def gg_next(call: CallbackQuery):
 def main_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
 
-        [InlineKeyboardButton(text="🎁 Наборы услуг (выгоднее)", callback_data="sets")],
+        [InlineKeyboardButton(text="🚘 Car Parking", callback_data="cp_menu")],
 
-        [InlineKeyboardButton(text="🚘 Услуги в игре", callback_data="services")],
+        [InlineKeyboardButton(text="🚗 Car Parking 2", callback_data="cp2")],
 
         [InlineKeyboardButton(text="🎓 Обучение GameGuardian", callback_data="gg_training")],
 
-        [InlineKeyboardButton(text="💬 Написать в поддержку", callback_data="support")]
+        [InlineKeyboardButton(text="💬 Поддержка", callback_data="support")]
 
     ])
         
@@ -309,7 +309,25 @@ def admin_menu():
         [InlineKeyboardButton(text="📊 Аналитика", callback_data="analytics")]
 
     ])
-    
+
+@dp.callback_query(F.data == "cp_menu")
+async def cp_menu(call: CallbackQuery):
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+
+        [InlineKeyboardButton(text="🎁 Наборы", callback_data="sets")],
+
+        [InlineKeyboardButton(text="🚘 Услуги", callback_data="services")],
+
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu")]
+
+    ])
+
+    await call.message.edit_text(
+        "🚘 Car Parking Multiplayer\n\nВыберите раздел:",
+        reply_markup=kb
+    )
+
 # =====================================================
 # GAMEGUARDIAN TRAINING START
 # =====================================================
@@ -608,6 +626,41 @@ async def buy_set(call: CallbackQuery):
         prices=prices
     )
 
+# =====================================================
+# BUY CP2
+# =====================================================
+
+@dp.callback_query(F.data == "buy_cp2")
+async def buy_cp2(call: CallbackQuery):
+
+    service = "CP2 | Накрутка 50.000.000 монет"
+
+    cursor.execute("""
+INSERT INTO orders(user_id,username,name,text,type,price,status,date)
+VALUES(?,?,?,?,?,?,?,?)
+""",(
+call.from_user.id,
+call.from_user.username,
+call.from_user.first_name,
+service,
+"service",
+20,
+"waiting_payment",
+datetime.now().strftime("%Y-%m-%d %H:%M")
+))
+
+    order_id = cursor.lastrowid
+    db.commit()
+
+    await bot.send_invoice(
+        chat_id=call.from_user.id,
+        title="50.000.000 монет",
+        description="Car Parking Multiplayer 2",
+        payload=f"order_{order_id}",
+        provider_token="",
+        currency="XTR",
+        prices=[LabeledPrice(label="50M монет", amount=20)]
+    )
 # ============================================================
 # START
 # ============================================================
@@ -778,7 +831,41 @@ f"""📊 Аналитика
 """,
         reply_markup=kb
     )
-    
+
+# ============================================================
+# CAR PARKING 2
+# ============================================================
+
+@dp.callback_query(F.data == "cp2")
+async def cp2_menu(call: CallbackQuery):
+
+    kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+
+            [InlineKeyboardButton(
+                text="🪙 Накрутка 50.000.000 монет — 20⭐",
+                callback_data="buy_cp2"
+            )],
+
+            [InlineKeyboardButton(
+                text="⬅ Назад",
+                callback_data="back_menu"
+            )]
+
+        ]
+    )
+
+    await call.message.edit_text(
+"""🚗 Car Parking Multiplayer 2
+
+Доступная услуга:
+
+🪙 Накрутка 50.000.000 монет
+
+⭐ Цена: 20 Stars""",
+        reply_markup=kb
+    )
+
 # ============================================================
 # SERVICES
 # ============================================================
