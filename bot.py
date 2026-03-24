@@ -211,9 +211,9 @@ GG_TRAINING = [
 Подходит для новичков и опытных пользователей.
 Всегда есть чему научиться.
 
-⭐ Цена: 150 Stars
+⭐ Цена: <s>150</s> → 98 Stars
 """,
-"price": 150,
+"price": 98,
 "url": "https://golicenko.github.io/nivora-bot/android5-14-guide.html"
 },
 
