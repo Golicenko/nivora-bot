@@ -700,19 +700,7 @@ async def buy_acc_cp1(call: CallbackQuery):
         call.from_user.id,
         title="Аккаунт CarParking",
         description="Покупка аккаунта CarParking 1",
-        payload="buy_account_cp1",  # ← ВАЖНО
-        provider_token="",
-        currency="XTR",
-        prices=prices
-    )
-
-    prices = [LabeledPrice(label="Аккаунт CP1", amount=1)]
-
-    await bot.send_invoice(
-        call.from_user.id,
-        title="Аккаунт CarParking",
-        description="Покупка аккаунта CarParking 1",
-        payload=f"order_{order_id}",
+        payload="buy_account_cp1",
         provider_token="",
         currency="XTR",
         prices=prices
