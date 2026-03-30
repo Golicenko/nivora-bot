@@ -1173,7 +1173,7 @@ async def payment(message: Message):
     # увеличиваем счетчик заказов
     ADMIN_ORDERS_COUNT += 1
 
-    # обновляем сообщение админа
+    # обновляем сообщение админа (ТОЛЬКО если не аккаунт)
     if order[5] != "account":
         await update_admin_orders()
 
@@ -1203,13 +1203,15 @@ async def payment(message: Message):
 """
             )
 
+            # удаляем аккаунт из базы
             cursor.execute("DELETE FROM accounts WHERE id=?", (acc[0],))
             db.commit()
 
-await bot.send_message(
-    ADMIN_ID,
-    "✅ Продан аккаунт CarParking 1"
-)
+            # уведомление админу
+            await bot.send_message(
+                ADMIN_ID,
+                "✅ Продан аккаунт CarParking 1"
+            )
 # ============================================================
 # TAKE ORDER
 # ============================================================
