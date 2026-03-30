@@ -1164,34 +1164,34 @@ async def payment(message: Message):
     # обновляем сообщение админа
     await update_admin_orders()
 
-# =========================
-# ВЫДАЧА АККАУНТА
-# =========================
+    # =========================
+    # ВЫДАЧА АККАУНТА
+    # =========================
 
-if order[5] == "account":
+    if order[5] == "account":
 
-    if "CarParking 1" in order[4]:
+        if "CarParking 1" in order[4]:
 
-        cursor.execute("SELECT * FROM accounts WHERE game='cp1' LIMIT 1")
-        acc = cursor.fetchone()
+            cursor.execute("SELECT * FROM accounts WHERE game='cp1' LIMIT 1")
+            acc = cursor.fetchone()
 
-        if not acc:
-            await message.answer("❗ Аккаунты закончились, напишите в поддержку")
-            return
+            if not acc:
+                await message.answer("❗ Аккаунты закончились, напишите в поддержку")
+                return
 
-        login = acc[1]
-        password = acc[2]
+            login = acc[1]
+            password = acc[2]
 
-        await message.answer(
-            f"""✅ Аккаунт выдан:
+            await message.answer(
+                f"""✅ Аккаунт выдан:
 
 Логин: {login}
 Пароль: {password}
 """
-        )
+            )
 
-        cursor.execute("DELETE FROM accounts WHERE id=?", (acc[0],))
-        db.commit()
+            cursor.execute("DELETE FROM accounts WHERE id=?", (acc[0],))
+            db.commit()
 # ============================================================
 # TAKE ORDER
 # ============================================================
