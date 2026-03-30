@@ -84,6 +84,16 @@ def log_visit(user_id):
 
     db.commit()
 
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS accounts(
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+login TEXT,
+password TEXT,
+game TEXT
+)
+""")
+db.commit()
+
 # ============================================================
 # STATES
 # ============================================================
@@ -96,6 +106,9 @@ class ReplyState(StatesGroup):
 
 class BroadcastState(StatesGroup):
     waiting_text = State()
+
+class AddAccountState(StatesGroup):
+    waiting_data = State()
     
 # ============================================================
 # DATA
@@ -297,7 +310,9 @@ def main_menu():
         [InlineKeyboardButton(text="🚗 Car Parking 2", callback_data="cp2")],
 
         [InlineKeyboardButton(text="🎓 Обучение GameGuardian", callback_data="gg_training")],
-
+    
+        [InlineKeyboardButton(text="🛒 Аккаунты", callback_data="accounts_menu")],
+        
         [InlineKeyboardButton(text="💬 Поддержка", callback_data="support")]
 
     ])
@@ -306,7 +321,8 @@ def admin_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📥 Новые заказы", callback_data="admin_new")],
         [InlineKeyboardButton(text="✅ Готовые", callback_data="admin_done")],
-        [InlineKeyboardButton(text="📊 Аналитика", callback_data="analytics")]
+        [InlineKeyboardButton(text="📊 Аналитика", callback_data="analytics")],
+        [InlineKeyboardButton(text="🛒 Аккаунты", callback_data="admin_accounts")]
 
     ])
 
@@ -328,6 +344,19 @@ async def cp_menu(call: CallbackQuery):
         reply_markup=kb
     )
 
+@dp.callback_query(F.data == "accounts_menu")
+async def accounts_menu(call: CallbackQuery):
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="CarParking 1", callback_data="acc_cp1")],
+        [InlineKeyboardButton(text="CarParking 2", callback_data="acc_cp2")],
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu")]
+    ])
+
+    await call.message.edit_text(
+        "Выберите игру ниже",
+        reply_markup=kb
+    )
 # =====================================================
 # GAMEGUARDIAN TRAINING START
 # =====================================================
@@ -661,6 +690,30 @@ datetime.now().strftime("%Y-%m-%d %H:%M")
         currency="XTR",
         prices=[LabeledPrice(label="50M монет", amount=20)]
     )
+
+@dp.callback_query(F.data == "buy_acc_cp1")
+async def buy_acc_cp1(call: CallbackQuery):
+
+    order_id = create_order(
+        call.from_user.id,
+        call.from_user.username,
+        call.from_user.first_name,
+        "Покупка аккаунта CarParking 1",
+        "account",
+        47
+    )
+
+    prices = [LabeledPrice(label="Аккаунт CP1", amount=47)]
+
+    await bot.send_invoice(
+        call.from_user.id,
+        title="Аккаунт CarParking",
+        description="Покупка аккаунта CarParking 1",
+        payload=f"order_{order_id}",
+        provider_token="",
+        currency="XTR",
+        prices=prices
+    )
 # ============================================================
 # START
 # ============================================================
@@ -843,7 +896,7 @@ async def cp2_menu(call: CallbackQuery):
         inline_keyboard=[
 
             [InlineKeyboardButton(
-                text="🪙 Накрутка 50.000.000 монет — 20⭐",
+                text="⭐",
                 callback_data="buy_cp2"
             )],
 
@@ -866,6 +919,49 @@ async def cp2_menu(call: CallbackQuery):
         reply_markup=kb
     )
 
+@dp.callback_query(F.data == "acc_cp1")
+async def acc_cp1(call: CallbackQuery):
+
+    cursor.execute("SELECT COUNT(*) FROM accounts WHERE game='cp1'")
+    count = cursor.fetchone()[0]
+
+    if count == 0:
+        kb = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="⬅ Назад", callback_data="accounts_menu")]
+        ])
+
+        await call.message.edit_text(
+            "❗ Нет аккаунтов в наличии",
+            reply_markup=kb
+        )
+        return
+
+    text = f"""в наличей {count}
+
+Аккаунт в Car Parking
+(Автовыдача)
+
+В аккаунт входит:
+
+✅ 50.000.000 виртов
+✅ 30.000 коинов
+✅ 187 машин
+✅ открыт W16
+✅ открыт дом 3
+✅ ранг King
+✅ куплена вся одежда
+✅ куплены все анимации
+✅ куплены все стикеры
+
+Цена: 47⭐️
+"""
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💳 Купить (47 ⭐)", callback_data="buy_acc_cp1")],
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="accounts_menu")]
+    ])
+
+    await call.message.edit_text(text, reply_markup=kb)
 # ============================================================
 # SERVICES
 # ============================================================
@@ -1068,7 +1164,34 @@ async def payment(message: Message):
     # обновляем сообщение админа
     await update_admin_orders()
 
+# =========================
+# ВЫДАЧА АККАУНТА
+# =========================
 
+if order[5] == "account":
+
+    if "CarParking 1" in order[4]:
+
+        cursor.execute("SELECT * FROM accounts WHERE game='cp1' LIMIT 1")
+        acc = cursor.fetchone()
+
+        if not acc:
+            await message.answer("❗ Аккаунты закончились, напишите в поддержку")
+            return
+
+        login = acc[1]
+        password = acc[2]
+
+        await message.answer(
+            f"""✅ Аккаунт выдан:
+
+Логин: {login}
+Пароль: {password}
+"""
+        )
+
+        cursor.execute("DELETE FROM accounts WHERE id=?", (acc[0],))
+        db.commit()
 # ============================================================
 # TAKE ORDER
 # ============================================================
@@ -1145,6 +1268,16 @@ async def back_menu(call: CallbackQuery):
 # ============================================================
 # ADMIN PANEL
 # ============================================================
+@dp.callback_query(F.data == "admin_accounts")
+async def admin_accounts(call: CallbackQuery):
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="➕ Добавить аккаунт", callback_data="add_account")],
+        [InlineKeyboardButton(text="📊 Посмотреть количество", callback_data="acc_stats")],
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="admin_back")]
+    ])
+
+    await call.message.edit_text("🛒 Управление аккаунтами", reply_markup=kb)
 
 @dp.message(Command("admin"))
 async def admin(message: Message):
@@ -1181,7 +1314,6 @@ async def send_db(message: Message):
 
 class BroadcastState(StatesGroup):
     waiting_text = State()
-
 
 @dp.message(Command("broadcast"))
 async def broadcast_start(message: Message, state: FSMContext):
@@ -1235,6 +1367,41 @@ async def broadcast_send(message: Message, state: FSMContext):
 
     await state.clear()
 
+@dp.callback_query(F.data == "add_account")
+async def add_account(call: CallbackQuery, state: FSMContext):
+
+    await call.message.edit_text(
+        "Отправьте аккаунт:\n\nlogin: xxx\npassword: xxx\ngame: cp1"
+    )
+
+    await state.set_state(AddAccountState.waiting_data)
+
+@dp.message(AddAccountState.waiting_data)
+async def save_account(message: Message, state: FSMContext):
+
+    try:
+        lines = message.text.split("\n")
+
+        login = lines[0].split(":")[1].strip()
+        password = lines[1].split(":")[1].strip()
+        game = lines[2].split(":")[1].strip()
+
+        if game not in ["cp1", "cp2"]:
+            raise Exception()
+
+        cursor.execute(
+            "INSERT INTO accounts(login,password,game) VALUES(?,?,?)",
+            (login, password, game)
+        )
+
+        db.commit()
+
+        await message.answer("✅ Аккаунт добавлен")
+
+    except:
+        await message.answer("❗ Ошибка формата")
+
+    await state.clear()
 # ============================================================
 # ADMIN ORDER NOTIFICATION
 # ============================================================
@@ -1485,6 +1652,28 @@ f"""✅ Готовые заказы
 
 📅 Сегодня: {today_done}
 📊 За всё время: {all_done}
+""",
+        reply_markup=kb
+    )
+
+@dp.callback_query(F.data == "acc_stats")
+async def acc_stats(call: CallbackQuery):
+
+    cursor.execute("SELECT COUNT(*) FROM accounts WHERE game='cp1'")
+    cp1 = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM accounts WHERE game='cp2'")
+    cp2 = cursor.fetchone()[0]
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="admin_accounts")]
+    ])
+
+    await call.message.edit_text(
+        f"""📊 Аккаунты
+
+CarParking 1: {cp1}
+CarParking 2: {cp2}
 """,
         reply_markup=kb
     )
