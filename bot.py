@@ -694,7 +694,7 @@ datetime.now().strftime("%Y-%m-%d %H:%M")
 @dp.callback_query(F.data == "buy_acc_cp1")
 async def buy_acc_cp1(call: CallbackQuery):
 
-    prices = [LabeledPrice(label="Аккаунт CP1", amount=1)]
+    prices = [LabeledPrice(label="Аккаунт CP1", amount=47)]
 
     await bot.send_invoice(
         call.from_user.id,
