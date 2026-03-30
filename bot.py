@@ -1090,6 +1090,11 @@ async def receive_question(message: Message, state: FSMContext):
     except:
         pass
 
+@dp.pre_checkout_query()
+async def checkout(pre_checkout_query: PreCheckoutQuery):
+    await bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)
+
+
 @dp.message(F.successful_payment)
 async def payment(message: Message):
 
