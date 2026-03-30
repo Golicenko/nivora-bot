@@ -700,10 +700,10 @@ async def buy_acc_cp1(call: CallbackQuery):
         call.from_user.first_name,
         "Покупка аккаунта CarParking 1",
         "account",
-        47
+        1
     )
 
-    prices = [LabeledPrice(label="Аккаунт CP1", amount=47)]
+    prices = [LabeledPrice(label="Аккаунт CP1", amount=1)]
 
     await bot.send_invoice(
         call.from_user.id,
@@ -962,6 +962,18 @@ async def acc_cp1(call: CallbackQuery):
     ])
 
     await call.message.edit_text(text, reply_markup=kb)
+
+@dp.callback_query(F.data == "acc_cp2")
+async def acc_cp2(call: CallbackQuery):
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="accounts_menu")]
+    ])
+
+    await call.message.edit_text(
+        "❗ Нет аккаунтов в наличии",
+        reply_markup=kb
+    )
 # ============================================================
 # SERVICES
 # ============================================================
@@ -1393,10 +1405,29 @@ async def save_account(message: Message, state: FSMContext):
             "INSERT INTO accounts(login,password,game) VALUES(?,?,?)",
             (login, password, game)
         )
-
         db.commit()
 
-        await message.answer("✅ Аккаунт добавлен")
+        success = await message.answer("✅ Аккаунт добавлен")
+
+        # ждём 2 секунды
+        await asyncio.sleep(2)
+
+        # удаляем всё
+        try:
+            await message.delete()
+        except:
+            pass
+
+        try:
+            await success.delete()
+        except:
+            pass
+
+        # возвращаем в админку
+        await message.answer(
+            "⚙️ Админ панель",
+            reply_markup=admin_menu()
+        )
 
     except:
         await message.answer("❗ Ошибка формата")
