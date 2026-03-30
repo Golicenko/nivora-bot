@@ -1174,6 +1174,7 @@ async def payment(message: Message):
     ADMIN_ORDERS_COUNT += 1
 
     # обновляем сообщение админа
+   if order[5] != "account":
     await update_admin_orders()
 
     # =========================
@@ -1204,6 +1205,11 @@ async def payment(message: Message):
 
             cursor.execute("DELETE FROM accounts WHERE id=?", (acc[0],))
             db.commit()
+
+await bot.send_message(
+    ADMIN_ID,
+    "✅ Продан аккаунт CarParking 1"
+)
 # ============================================================
 # TAKE ORDER
 # ============================================================
@@ -1382,14 +1388,18 @@ async def broadcast_send(message: Message, state: FSMContext):
 @dp.callback_query(F.data == "add_account")
 async def add_account(call: CallbackQuery, state: FSMContext):
 
-    await call.message.edit_text(
+    msg = await call.message.edit_text(
         "Отправьте аккаунт:\n\nlogin: xxx\npassword: xxx\ngame: cp1"
     )
 
+    await state.update_data(prompt_msg=msg.message_id)
     await state.set_state(AddAccountState.waiting_data)
 
 @dp.message(AddAccountState.waiting_data)
 async def save_account(message: Message, state: FSMContext):
+
+    data = await state.get_data()
+    prompt_msg = data.get("prompt_msg")
 
     try:
         lines = message.text.split("\n")
@@ -1405,25 +1415,21 @@ async def save_account(message: Message, state: FSMContext):
             "INSERT INTO accounts(login,password,game) VALUES(?,?,?)",
             (login, password, game)
         )
+
         db.commit()
 
-        success = await message.answer("✅ Аккаунт добавлен")
-
-        # ждём 2 секунды
-        await asyncio.sleep(2)
-
-        # удаляем всё
+        # удаляем сообщения
         try:
             await message.delete()
         except:
             pass
 
         try:
-            await success.delete()
+            await bot.delete_message(message.chat.id, prompt_msg)
         except:
             pass
 
-        # возвращаем в админку
+        # отправляем чистую админку
         await message.answer(
             "⚙️ Админ панель",
             reply_markup=admin_menu()
@@ -1562,7 +1568,7 @@ async def view_order(call: CallbackQuery):
 # =====================================================
 
 @dp.callback_query(F.data.startswith("reply_") & ~F.data.startswith("reply_support_"))
-async def reply_start(call: CallbackQuery, state: FSMContext):
+async def reply_start(call: CallbackQuery, state: FSMContext): 
 
     order_id = call.data.split("_")[1]
 
@@ -1587,8 +1593,8 @@ async def reply_send(message: Message, state: FSMContext):
     data = await state.get_data()
 
     order_id = data.get("order_id")
-    reply_msg = data.get("reply_msg")
     order_msg_id = data.get("order_msg_id")
+    reply_msg_id = data.get("reply_msg")
 
     cursor.execute(
         "SELECT user_id FROM orders WHERE id=?",
@@ -1610,35 +1616,32 @@ async def reply_send(message: Message, state: FSMContext):
     )
 
     # отправляем ответ клиенту
-    reply_msg = await bot.send_message(
-    user_id,
-    f"""📩 Ответ 
+    await bot.send_message(
+        user_id,
+        f"""📩 Ответ 
 
 {message.text}
 
 ⬇ Нажмите кнопку ниже чтобы очистить чат и вернуться в меню""",
-    reply_markup=kb
-)
-    
+        reply_markup=kb
+    )
+
     # меняем статус заказа
     cursor.execute(
         "UPDATE orders SET status='done' WHERE id=?",
         (order_id,)
     )
-
     db.commit()
 
     await state.clear()
 
-    # удаляем сообщение админа
-    try:
-        await message.delete()
-    except:
-        pass
+    # =========================
+    # УДАЛЕНИЕ ВСЕГО МУСОРА
+    # =========================
 
-    # удаляем "Напишите ответ"
+    # удаляем сообщение "Напишите ответ"
     try:
-        await bot.delete_message(ADMIN_ID, reply_msg)
+        await bot.delete_message(ADMIN_ID, reply_msg_id)
     except:
         pass
 
@@ -1648,13 +1651,21 @@ async def reply_send(message: Message, state: FSMContext):
     except:
         pass
 
-    # админ меню
+    # удаляем сообщение админа (его ответ)
+    try:
+        await message.delete()
+    except:
+        pass
+
+    # =========================
+    # ВОЗВРАТ В АДМИНКУ
+    # =========================
+
     await bot.send_message(
         ADMIN_ID,
         "⚙️ Админ панель",
         reply_markup=admin_menu()
     )
-    
 # ============================================================
 # DONE ORDERS
 # ============================================================
