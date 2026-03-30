@@ -694,13 +694,16 @@ datetime.now().strftime("%Y-%m-%d %H:%M")
 @dp.callback_query(F.data == "buy_acc_cp1")
 async def buy_acc_cp1(call: CallbackQuery):
 
-    order_id = create_order(
+    prices = [LabeledPrice(label="Аккаунт CP1", amount=1)]
+
+    await bot.send_invoice(
         call.from_user.id,
-        call.from_user.username,
-        call.from_user.first_name,
-        "Покупка аккаунта CarParking 1",
-        "account",
-        1
+        title="Аккаунт CarParking",
+        description="Покупка аккаунта CarParking 1",
+        payload="buy_account_cp1",  # ← ВАЖНО
+        provider_token="",
+        currency="XTR",
+        prices=prices
     )
 
     prices = [LabeledPrice(label="Аккаунт CP1", amount=1)]
@@ -1212,6 +1215,40 @@ async def payment(message: Message):
                 ADMIN_ID,
                 "✅ Продан аккаунт CarParking 1"
             )
+
+# =========================
+# ПОКУПКА АККАУНТА (БЕЗ ORDER)
+# =========================
+
+if payload == "buy_account_cp1":
+
+    cursor.execute("SELECT * FROM accounts WHERE game='cp1' LIMIT 1")
+    acc = cursor.fetchone()
+
+    if not acc:
+        await message.answer("❗ Аккаунты закончились, напишите в поддержку")
+        return
+
+    login = acc[1]
+    password = acc[2]
+
+    await message.answer(
+        f"""✅ Аккаунт выдан:
+
+Логин: {login}
+Пароль: {password}
+"""
+    )
+
+    cursor.execute("DELETE FROM accounts WHERE id=?", (acc[0],))
+    db.commit()
+
+    await bot.send_message(
+        ADMIN_ID,
+        "✅ Продан аккаунт CarParking 1"
+    )
+
+    return  # ← ВАЖНО! чтобы дальше не шёл код с orders
 # ============================================================
 # TAKE ORDER
 # ============================================================
