@@ -1102,21 +1102,50 @@ async def receive_question(message: Message, state: FSMContext):
     except:
         pass
 
-# ============================================================
-# PAYMENT
-# ============================================================
-
-@dp.pre_checkout_query()
-async def checkout(pre_checkout_query: PreCheckoutQuery):
-    await bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)
-
-
 @dp.message(F.successful_payment)
 async def payment(message: Message):
 
     global ADMIN_ORDERS_COUNT
 
     payload = message.successful_payment.invoice_payload
+
+    # ====================================================
+    # 🔥 ПОКУПКА АККАУНТА (БЕЗ ORDER)
+    # ====================================================
+
+    if payload == "buy_account_cp1":
+
+        cursor.execute("SELECT * FROM accounts WHERE game='cp1' LIMIT 1")
+        acc = cursor.fetchone()
+
+        if not acc:
+            await message.answer("❗ Аккаунты закончились, напишите в поддержку")
+            return
+
+        login = acc[1]
+        password = acc[2]
+
+        await message.answer(
+            f"""✅ Аккаунт выдан:
+
+Логин: {login}
+Пароль: {password}
+"""
+        )
+
+        cursor.execute("DELETE FROM accounts WHERE id=?", (acc[0],))
+        db.commit()
+
+        await bot.send_message(
+            ADMIN_ID,
+            "✅ Продан аккаунт CarParking 1"
+        )
+
+        return  # ❗ ВАЖНО — дальше код не идёт
+
+    # ====================================================
+    # 🔽 ОБЫЧНЫЕ ЗАКАЗЫ (как было)
+    # ====================================================
 
     try:
         order_id = int(payload.split("_")[1])
@@ -1176,79 +1205,9 @@ async def payment(message: Message):
     # увеличиваем счетчик заказов
     ADMIN_ORDERS_COUNT += 1
 
-    # обновляем сообщение админа (ТОЛЬКО если не аккаунт)
-    if order[5] != "account":
-        await update_admin_orders()
+    # обновляем сообщение админа
+    await update_admin_orders()
 
-    # =========================
-    # ВЫДАЧА АККАУНТА
-    # =========================
-
-    if order[5] == "account":
-
-        if "CarParking 1" in order[4]:
-
-            cursor.execute("SELECT * FROM accounts WHERE game='cp1' LIMIT 1")
-            acc = cursor.fetchone()
-
-            if not acc:
-                await message.answer("❗ Аккаунты закончились, напишите в поддержку")
-                return
-
-            login = acc[1]
-            password = acc[2]
-
-            await message.answer(
-                f"""✅ Аккаунт выдан:
-
-Логин: {login}
-Пароль: {password}
-"""
-            )
-
-            # удаляем аккаунт из базы
-            cursor.execute("DELETE FROM accounts WHERE id=?", (acc[0],))
-            db.commit()
-
-            # уведомление админу
-            await bot.send_message(
-                ADMIN_ID,
-                "✅ Продан аккаунт CarParking 1"
-            )
-
-# =========================
-# ПОКУПКА АККАУНТА (БЕЗ ORDER)
-# =========================
-
-if payload == "buy_account_cp1":
-
-    cursor.execute("SELECT * FROM accounts WHERE game='cp1' LIMIT 1")
-    acc = cursor.fetchone()
-
-    if not acc:
-        await message.answer("❗ Аккаунты закончились, напишите в поддержку")
-        return
-
-    login = acc[1]
-    password = acc[2]
-
-    await message.answer(
-        f"""✅ Аккаунт выдан:
-
-Логин: {login}
-Пароль: {password}
-"""
-    )
-
-    cursor.execute("DELETE FROM accounts WHERE id=?", (acc[0],))
-    db.commit()
-
-    await bot.send_message(
-        ADMIN_ID,
-        "✅ Продан аккаунт CarParking 1"
-    )
-
-    return  # ← ВАЖНО! чтобы дальше не шёл код с orders
 # ============================================================
 # TAKE ORDER
 # ============================================================
