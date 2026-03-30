@@ -1174,8 +1174,8 @@ async def payment(message: Message):
     ADMIN_ORDERS_COUNT += 1
 
     # обновляем сообщение админа
-   if order[5] != "account":
-    await update_admin_orders()
+    if order[5] != "account":
+        await update_admin_orders()
 
     # =========================
     # ВЫДАЧА АККАУНТА
