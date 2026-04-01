@@ -305,15 +305,26 @@ async def gg_next(call: CallbackQuery):
 def main_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
 
-        [InlineKeyboardButton(text="🚗 Услуги и прокачка CP1", callback_data="cp_menu")],
+        # CP1
+        [InlineKeyboardButton(text="🚗 Услуги Car Parking 1", callback_data="cp_menu")],
 
-        [InlineKeyboardButton(text="🚙 Услуги CP2", callback_data="cp2")],
+        # CP2
+        [InlineKeyboardButton(text="🚙 Услуги Car Parking 2", callback_data="cp2")],
 
+        # обучение
         [InlineKeyboardButton(text="🎓 Обучение GameGuardian", callback_data="gg_training")],
 
+        # аккаунты
         [InlineKeyboardButton(text="🛒 Купить аккаунт", callback_data="accounts_menu")],
 
-        [InlineKeyboardButton(text="💬 Написать в поддержку", callback_data="support")]
+        # отзывы (ССЫЛКА)
+        [InlineKeyboardButton(
+            text="⭐ Отзывы",
+            url="https://t.me/otzyvy_AutoFlow1"
+        )],
+
+        # поддержка
+        [InlineKeyboardButton(text="💬 Поддержка", callback_data="support")]
 
     ])
         
@@ -855,16 +866,16 @@ async def back(call: CallbackQuery):
     # текст главного меню
     text = """AF Bot ~ Главное меню  
 
-💎 Прокачка аккаунтов и услуги GameGuardian  
-⚡ Быстро, безопасно и с опытом  
-🎓 Обучение с нуля до результата  
+💎 Прокачка аккаунтов и услуги  
+⚡ Быстро • Безопасно • Проверено  
+🎓 Обучение GameGuardian с нуля  
 
 ━━━━━━ ⋆ ✦ ⋆ ━━━━━━  
 
-📦 Наборы прокачки (выгоднее)  
-⚙️ Отдельные услуги под заказ  
-🛒 Готовые аккаунты CP1 / CP2  
-💬 Поддержка и помощь 24/7  
+📦 Наборы и услуги для CP1 / CP2  
+🛒 Готовые аккаунты в продаже  
+⭐ Более 150+ отзывов  
+💬 Поддержка 24/7  
 
 👇 Выбери раздел
 """
@@ -996,7 +1007,7 @@ async def cp2_sets(call: CallbackQuery):
 async def cp2_services(call: CallbackQuery):
 
     kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="💰 50.000.000 виртов — 20⭐", callback_data="buy_cp2")],
+        [InlineKeyboardButton(text="Купить", callback_data="buy_cp2")],
         [InlineKeyboardButton(text="⬅ Назад", callback_data="cp2")]
     ])
 
