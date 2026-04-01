@@ -305,15 +305,15 @@ async def gg_next(call: CallbackQuery):
 def main_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
 
-        [InlineKeyboardButton(text="🚘 Car Parking", callback_data="cp_menu")],
+        [InlineKeyboardButton(text="🚗 Услуги и прокачка CP1", callback_data="cp_menu")],
 
-        [InlineKeyboardButton(text="🚗 Car Parking 2", callback_data="cp2")],
+        [InlineKeyboardButton(text="🚙 Услуги CP2", callback_data="cp2")],
 
         [InlineKeyboardButton(text="🎓 Обучение GameGuardian", callback_data="gg_training")],
-    
-        [InlineKeyboardButton(text="🛒 Аккаунты", callback_data="accounts_menu")],
-        
-        [InlineKeyboardButton(text="💬 Поддержка", callback_data="support")]
+
+        [InlineKeyboardButton(text="🛒 Купить аккаунт", callback_data="accounts_menu")],
+
+        [InlineKeyboardButton(text="💬 Написать в поддержку", callback_data="support")]
 
     ])
         
@@ -386,7 +386,7 @@ async def accounts_menu(call: CallbackQuery):
 
     await call.message.edit_media(
         media=InputMediaPhoto(
-            media=FSInputFile("support.jpg"),
+            media=FSInputFile("accounts.jpg"),
             caption=text
         ),
         reply_markup=kb
@@ -852,21 +852,20 @@ def trust_menu():
 @dp.callback_query(F.data == "back")
 async def back(call: CallbackQuery):
 
-    text = """AF Bot ~  Главное меню  
+text = """AF Bot ~ Главное меню  
 
-💎 Премиум подход к каждому аккаунту  
-⚡ Каждая услуга выполняется профессионально и с учётом деталей  
-🎓 Профессиональное обучение с опытом более 3 лет  
+💎 Прокачка аккаунтов и услуги GameGuardian  
+⚡ Быстро, безопасно и с опытом  
+🎓 Обучение с нуля до результата  
 
-━━━━━━ ⋆ ✦ ⋆ ━━━━━━
+━━━━━━ ⋆ ✦ ⋆ ━━━━━━  
 
-⚡ Более 15 услуг — быстро и выгодно  
-📦 Наборы для прокачки аккаунта [Car Parking 1]  
-🎓 Обучение GameGuardian — с нуля ⇒ до навыков уверенного использования  
-🛒 Продажа готовых аккаунтов CP1/CP2  
-💬 Поддержка 24/7 — всегда ответим ~ поможем  
+📦 Наборы прокачки (выгоднее)  
+⚙️ Отдельные услуги под заказ  
+🛒 Готовые аккаунты CP1 / CP2  
+💬 Поддержка и помощь 24/7  
 
-👇 Выбери нужный раздел <3
+👇 Выбери раздел
 """
 
     await call.message.edit_media(
@@ -932,33 +931,74 @@ f"""📊 Аналитика
 @dp.callback_query(F.data == "cp2")
 async def cp2_menu(call: CallbackQuery):
 
-    kb = InlineKeyboardMarkup(
-        inline_keyboard=[
+    kb = InlineKeyboardMarkup(inline_keyboard=[
 
-            [InlineKeyboardButton(
-                text="⭐",
-                callback_data="buy_cp2"
-            )],
+        [InlineKeyboardButton(text="🎁 Наборы", callback_data="cp2_sets")],
 
-            [InlineKeyboardButton(
-                text="⬅ Назад",
-                callback_data="back_menu"
-            )]
+        [InlineKeyboardButton(text="⚙️ Услуги", callback_data="cp2_services")],
 
-        ]
-    )
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu")]
 
-    await call.message.edit_text(
-"""🚗 Car Parking Multiplayer 2
+    ])
 
-Доступная услуга:
+    text = """🚙 AF Bot ~ Car Parking 2  
 
-🪙 Накрутка 50.000.000 монет
+💎 Услуги для прокачки аккаунта  
 
-⭐ Цена: 20 Stars""",
+📦 Наборы — скоро будут доступны  
+
+⚙️ Услуги — доступна базовая прокачка  
+
+👇 Выберите раздел
+"""
+
+    await call.message.edit_media(
+        media=InputMediaPhoto(
+            media=FSInputFile("cp2.jpg"),
+            caption=text
+        ),
         reply_markup=kb
     )
 
+@dp.callback_query(F.data == "cp2_sets")
+async def cp2_sets(call: CallbackQuery):
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="cp2")]
+    ])
+
+    await call.message.edit_text(
+        "❗ Наборы пока недоступны",
+        reply_markup=kb
+    )
+
+@dp.callback_query(F.data == "cp2_services")
+async def cp2_services(call: CallbackQuery):
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+
+        [InlineKeyboardButton(text="💰 50.000.000 виртов — 20⭐", callback_data="buy_cp2")],
+
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="cp2")]
+
+    ])
+
+    text = """⚙️ Услуги Car Parking 2  
+
+💰 Доступно: накрутка 50.000.000 виртов  
+
+⚡ Выполняется быстро и безопасно  
+
+👇 Нажмите для покупки
+"""
+
+    await call.message.edit_media(
+        media=InputMediaPhoto(
+            media=FSInputFile("cp2.jpg"),
+            caption=text
+        ),
+        reply_markup=kb
+    )
 @dp.callback_query(F.data == "acc_cp1")
 async def acc_cp1(call: CallbackQuery):
 
