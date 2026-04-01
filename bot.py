@@ -1040,11 +1040,18 @@ async def acc_cp1(call: CallbackQuery):
         [InlineKeyboardButton(text="⬅ Назад", callback_data="accounts_menu")]
     ])
 
+    # ❗ УДАЛЯЕМ СООБЩЕНИЕ С ФОТО
+    try:
+        await call.message.delete()
+    except:
+        pass
+
     if count == 0:
-        await call.message.edit_text(
+        await call.message.answer(
             "❗ Нет аккаунтов в наличии",
             reply_markup=kb
         )
+        await call.answer()
         return
 
     text = f"""📦 В наличии: {count}
@@ -1064,7 +1071,9 @@ async def acc_cp1(call: CallbackQuery):
 ⭐ Цена: 47⭐
 """
 
-    await call.message.edit_text(text, reply_markup=kb)
+    await call.message.answer(text, reply_markup=kb)
+
+    await call.answer()
 # ============================================================
 # 🛒 АККАУНТЫ — CAR PARKING 2
 # ============================================================
@@ -1076,13 +1085,17 @@ async def acc_cp2(call: CallbackQuery):
         [InlineKeyboardButton(text="⬅ Назад", callback_data="accounts_menu")]
     ])
 
-    await call.message.edit_media(
-        media=InputMediaPhoto(
-            media=FSInputFile("accounts.jpg"),
-            caption="❗ Аккаунты Car Parking 2 пока отсутствуют"
-        ),
+    try:
+        await call.message.delete()
+    except:
+        pass
+
+    await call.message.answer(
+        "❗ Аккаунты Car Parking 2 пока отсутствуют",
         reply_markup=kb
     )
+
+    await call.answer()
 # ============================================================
 # SERVICES
 # ============================================================
@@ -1391,21 +1404,21 @@ from aiogram.types import InputMediaPhoto
 @dp.callback_query(F.data == "back_menu")
 async def back_menu(call: CallbackQuery):
 
-    text = """AF Bot ~  Главное меню  
+    text = """AF Bot ~ Главное меню  
 
-💎 Премиум подход к каждому аккаунту  
-⚡ Каждая услуга выполняется профессионально и с учётом деталей  
-🎓 Профессиональное обучение с опытом более 3 лет  
+💎 Прокачка аккаунтов и услуги  
+⚡ Быстро • Надёжно • Безопасно  
 
-━━━━━━ ⋆ ✦ ⋆ ━━━━━━
+━━━━━━ ⋆ ✦ ⋆ ━━━━━━  
 
-⚡ Более 15 услуг — быстро и выгодно  
-📦 Наборы для прокачки аккаунта [Car Parking 1]  
-🎓 Обучение GameGuardian — с нуля ⇒ до навыков уверенного использования  
-🛒 Продажа готовых аккаунтов CP1/CP2  
-💬 Поддержка 24/7 — всегда ответим ~ поможем  
+🚗 Услуги Car Parking 1/2
+🎓 Обучение GameGuardian  
+🛒 Готовые аккаунты  
 
-👇 Выбери нужный раздел <3
+⭐ Более 150+ отзывов  
+💬 Поддержка 24/7  
+
+👇 Выбери раздел
 """
 
     try:
