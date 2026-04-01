@@ -339,10 +339,26 @@ async def cp_menu(call: CallbackQuery):
 
     ])
 
-    await call.message.edit_text(
-        "🚘 Car Parking Multiplayer\n\nВыберите раздел:",
-        reply_markup=kb
-    )
+   text = """🚗 AF Bot ~ Меню ~ Car Parking 1  
+
+💎 Здесь вы можете прокачать свой аккаунт или заказать услуги Game_Guardiana
+
+📦 Наборы — готовые варианты прокачки аккаунта  
+Они выгоднее, чем отдельные услуги  
+
+⚡ Услуги — более 15 вариантов
+Вы можете выбрать именно то, что вам нужно
+
+👇 Выберите нужный раздел
+"""
+
+await call.message.edit_media(
+    media=InputMediaPhoto(
+        media=FSInputFile("images/car_parking.jpg"),
+        caption=text
+    ),
+    reply_markup=kb
+)
 
 @dp.callback_query(F.data == "accounts_menu")
 async def accounts_menu(call: CallbackQuery):
@@ -353,10 +369,28 @@ async def accounts_menu(call: CallbackQuery):
         [InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu")]
     ])
 
-    await call.message.edit_text(
-        "Выберите игру ниже",
-        reply_markup=kb
-    )
+   text = """🛒 Аккаунты  
+
+✨ Здесь вы можете купить готовый аккаунт  
+для Car Parking 1 / 2  
+
+🔐 Аккаунты создаются вручную  
+и не передаются третьим лицам  
+— доступ остаётся только у вас  
+
+⚡ Выдача сразу после оплаты  
+без ожидания.
+
+👇 Выберите нужный раздел
+"""
+
+await call.message.edit_media(
+    media=InputMediaPhoto(
+        media=FSInputFile("images/accounts.jpg"),
+        caption=text
+    ),
+    reply_markup=kb
+)
 # =====================================================
 # GAMEGUARDIAN TRAINING START
 # =====================================================
@@ -1031,16 +1065,24 @@ async def support(call: CallbackQuery, state: FSMContext):
         ]
     )
 
-    await call.message.edit_text(
-"""💬 Поддержка
+  text = """💬 Поддержка  
 
-Напишите ваше сообщение прямо в чат.
+Напишите ваше сообщение прямо в чат.  
 
-Опишите проблему максимально подробно,
-чтобы мы могли быстрее помочь.""",
-        reply_markup=kb
-    )
+Опишите проблему максимально подробно,  
+чтобы мы могли быстрее помочь.  
 
+Поддержка работает по вопросам:  
+оплата, зависания, ошибки бота, отсутствие аккаунтов и другие технические проблемы. <3 
+"""
+
+await call.message.edit_media(
+    media=InputMediaPhoto(
+        media=FSInputFile("images/support.jpg"),
+        caption=text
+    ),
+    reply_markup=kb
+)
     await state.set_state(AskState.waiting_question)
 @dp.message(AskState.waiting_question)
 async def receive_question(message: Message, state: FSMContext):
@@ -1249,21 +1291,46 @@ async def accept_all_orders(call: CallbackQuery):
 # BACK TO MENU
 # ============================================================
 
+from aiogram.types import InputMediaPhoto
+
+
 @dp.callback_query(F.data == "back_menu")
 async def back_menu(call: CallbackQuery):
 
-    text = """AF Bot — Главное меню
+    text = """AF Bot ~  Главное меню  
 
-🚘 Прокачай свой аккаунт в игре Car Parking.
+💎 Премиум подход к каждому аккаунту  
+⚡ Каждая услуга выполняется профессионально и с учётом деталей  
+🎓 Профессиональное обучение с опытом более 3 лет  
 
-Выбери услугу, наборы
-или задай свой вопрос ниже 👇"""
+━━━━━━ ⋆ ✦ ⋆ ━━━━━━
+
+⚡ Более 15 услуг — быстро и выгодно  
+📦 Наборы для прокачки аккаунта [Car Parking 1]  
+🎓 Обучение GameGuardian — с нуля ⇒ до навыков уверенного использования  
+🛒 Продажа готовых аккаунтов CP1/CP2  
+💬 Поддержка 24/7 — всегда ответим ~ поможем  
+
+👇 Выбери нужный раздел <3
+"""
 
     try:
-        await call.message.edit_text(
-            text,
+        await call.message.edit_media(
+            media=InputMediaPhoto(
+                media=FSInputFile("images/main_menu.jpg"),
+                caption=text
+            ),
             reply_markup=main_menu()
         )
+    except:
+        await call.message.delete()
+        await call.message.answer_photo(
+            photo=FSInputFile("images/main_menu.jpg"),
+            caption=text,
+            reply_markup=main_menu()
+        )
+
+    await call.answer()
     except:
         # если вдруг сообщение не редактируется
         await call.message.delete()
