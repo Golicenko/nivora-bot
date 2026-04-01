@@ -876,8 +876,6 @@ await call.message.edit_media(
 
 await call.answer()
 
-    await call.answer()
-
 # ============================================================
 # ANALYTICS TODAY
 # ============================================================
