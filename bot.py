@@ -1058,21 +1058,30 @@ async def acc_cp2(call: CallbackQuery):
 # SERVICES
 # ============================================================
 
-@dp.callback_query(F.data=="services")
-async def services(call:CallbackQuery):
+@dp.callback_query(F.data == "services")
+async def services(call: CallbackQuery):
 
     log_visit(call.from_user.id)
 
-    buttons=[]
-    for i,s in enumerate(SERVICES):
-        buttons.append([InlineKeyboardButton(text=s,callback_data=f"service_{i}")])
+    buttons = []
+    for i, s in enumerate(SERVICES):
+        buttons.append([InlineKeyboardButton(text=s, callback_data=f"service_{i}")])
 
-    buttons.append([InlineKeyboardButton(text="⬅ Назад",callback_data="cp_menu")])
+    buttons.append([InlineKeyboardButton(text="⬅ Назад", callback_data="cp_menu")])
 
-    await call.message.edit_text(
+    # ❗ удаляем сообщение с фото
+    try:
+        await call.message.delete()
+    except:
+        pass
+
+    # ❗ отправляем новое без фото
+    await call.message.answer(
         "🚘 Игровые услуги\nЦена любой услуги 10⭐",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons)
     )
+
+    await call.answer()
 
 @dp.callback_query(F.data.startswith("service_"))
 async def buy_service(call:CallbackQuery):
