@@ -339,7 +339,7 @@ async def cp_menu(call: CallbackQuery):
 
     ])
 
-   text = """🚗 AF Bot ~ Меню ~ Car Parking 1  
+    text = """🚗 AF Bot ~ Меню ~ Car Parking 1  
 
 💎 Здесь вы можете прокачать свой аккаунт или заказать услуги Game_Guardiana
 
@@ -352,13 +352,13 @@ async def cp_menu(call: CallbackQuery):
 👇 Выберите нужный раздел
 """
 
-await call.message.edit_media(
-    media=InputMediaPhoto(
-        media=FSInputFile("images/car_parking.jpg"),
-        caption=text
-    ),
-    reply_markup=kb
-)
+    await call.message.edit_media(
+        media=InputMediaPhoto(
+            media=FSInputFile("images/car_parking.jpg"),
+            caption=text
+        ),
+        reply_markup=kb
+    )
 
 @dp.callback_query(F.data == "accounts_menu")
 async def accounts_menu(call: CallbackQuery):
