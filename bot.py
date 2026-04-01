@@ -3,7 +3,6 @@
 # ============================================================
 
 import asyncio
-import sqlite3
 from datetime import datetime, timedelta
 
 from aiogram import Bot, Dispatcher, F
@@ -32,68 +31,88 @@ bot = Bot(TOKEN)
 dp = Dispatcher(storage=MemoryStorage())
 
 # ============================================================
-# DATABASE
+# DATABASE (POSTGRESQL)
 # ============================================================
 
-db = sqlite3.connect("/data/bot.db", check_same_thread=False)
+import psycopg2
+import os
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+db = psycopg2.connect(DATABASE_URL)
 cursor = db.cursor()
+
+# =========================
+# TABLES
+# =========================
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS users(
+    user_id BIGINT PRIMARY KEY
+)
+""")
 
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS orders(
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-user_id INTEGER,
-username TEXT,
-name TEXT,
-text TEXT,
-type TEXT,
-price INTEGER,
-status TEXT,
-date TEXT
+    id SERIAL PRIMARY KEY,
+    user_id BIGINT,
+    username TEXT,
+    name TEXT,
+    text TEXT,
+    type TEXT,
+    price INTEGER,
+    status TEXT,
+    date TEXT
 )
 """)
+
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS visits(
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-user_id INTEGER,
-date TEXT
+    id SERIAL PRIMARY KEY,
+    user_id BIGINT,
+    date TEXT
+)
+""")
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS accounts(
+    id SERIAL PRIMARY KEY,
+    login TEXT,
+    password TEXT,
+    game TEXT
 )
 """)
 
 db.commit()
+
+
+# =========================
+# FUNCTIONS
+# =========================
 
 def create_order(user_id, username, name, text, type, price):
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     cursor.execute(
-        "INSERT INTO orders(user_id, username, name, text, type, price, status, date) VALUES(?,?,?,?,?,?,?,?)",
+        "INSERT INTO orders(user_id, username, name, text, type, price, status, date) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)",
         (user_id, username, name, text, type, price, "waiting_payment", now)
     )
 
     db.commit()
 
-    return cursor.lastrowid
+    cursor.execute("SELECT LASTVAL()")
+    return cursor.fetchone()[0]
 
-# ФУНКЦИЯ ЗАПИСИ АКТИВНОСТИ
+
 def log_visit(user_id):
 
     cursor.execute(
-        "INSERT INTO visits(user_id,date) VALUES(?,?)",
+        "INSERT INTO visits(user_id,date) VALUES(%s,%s)",
         (user_id, datetime.now().strftime("%Y-%m-%d"))
     )
 
     db.commit()
-
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS accounts(
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-login TEXT,
-password TEXT,
-game TEXT
-)
-""")
-db.commit()
-
 # ============================================================
 # STATES
 # ============================================================
@@ -754,29 +773,26 @@ async def start(message: Message):
     user_id = message.from_user.id
     name = message.from_user.first_name
 
-    conn = sqlite3.connect("bot.db")
-    cursor = conn.cursor()
-
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS users(
-        user_id INTEGER PRIMARY KEY
-    )
-    """)
+    # =========================
+    # DATABASE (БЕЗ SQLITE)
+    # =========================
 
     cursor.execute(
-        "INSERT OR IGNORE INTO users (user_id) VALUES (?)",
+        "INSERT INTO users (user_id) VALUES (%s) ON CONFLICT DO NOTHING",
         (user_id,)
     )
 
     cursor.execute(
-        "INSERT INTO visits(user_id,date) VALUES(?,?)",
+        "INSERT INTO visits(user_id,date) VALUES(%s,%s)",
         (user_id, datetime.now().strftime("%Y-%m-%d"))
     )
 
-    conn.commit()
-    conn.close()
+    db.commit()
 
-    # ✅ ТВОЙ ТЕКСТ — Я НЕ СОКРАЩАЛ
+    # =========================
+    # ТВОЁ МЕНЮ (НЕ ТРОГАЛ)
+    # =========================
+
     text = """AF Bot ~ Главное меню  
 
 💎 Прокачка аккаунтов и услуги  
@@ -794,7 +810,6 @@ async def start(message: Message):
 👇 Выбери раздел
 """
 
-    # ✅ ВАЖНО: теперь внутри функции
     await message.answer_photo(
         photo=FSInputFile("main_menu.jpg"),
         caption=text,
