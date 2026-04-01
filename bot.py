@@ -305,28 +305,18 @@ async def gg_next(call: CallbackQuery):
 def main_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
 
-        # CP1
         [InlineKeyboardButton(text="🚗 Услуги Car Parking 1", callback_data="cp_menu")],
-
-        # CP2
         [InlineKeyboardButton(text="🚙 Услуги Car Parking 2", callback_data="cp2")],
 
-        # обучение
         [InlineKeyboardButton(text="🎓 Обучение GameGuardian", callback_data="gg_training")],
-
-        # аккаунты
         [InlineKeyboardButton(text="🛒 Купить аккаунт", callback_data="accounts_menu")],
 
-        # отзывы (ССЫЛКА)
-        [InlineKeyboardButton(
-            text="⭐ Отзывы",
-            url="https://t.me/otzyvy_AutoFlow1"
-        )],
+        [InlineKeyboardButton(text="🔒 Политика безопасности", callback_data="policy")],
 
-        # поддержка
+        [InlineKeyboardButton(text="⭐ Отзывы", url="https://t.me/otzyvy_AutoFlow1")],
         [InlineKeyboardButton(text="💬 Поддержка", callback_data="support")]
-
     ])
+ 
         
 def admin_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -783,26 +773,28 @@ async def start(message: Message):
     conn.commit()
     conn.close()
 
-    text = f"""Здравствуй, {name}! 👋
+    text = """AF Bot ~ Главное меню  
 
-Если ты совершаешь покупку первый раз в нашем боте,
-рекомендуем ознакомиться с информацией ниже.
+💎 Прокачка аккаунтов и услуги  
+⚡ Быстро • Надёжно • Безопасно  
 
-Мы подготовили несколько страниц с важной информацией:
+━━━━━━ ⋆ ✦ ⋆ ━━━━━━  
 
-🔎 Почему нам можно доверять  
-🔒 Гарантии безопасности  
-🛒 Как проходит покупка  
-🌐 Наши официальные каналы  
+🚗 Услуги Car Parking 1/2
+🎓 Обучение GameGuardian  
+🛒 Готовые аккаунты  
 
-После ознакомления ты можешь перейти в основное меню бота.
+⭐ Более 150+ отзывов  
+💬 Поддержка 24/7  
+
+👇 Выбери раздел
 """
 
-    await message.answer(
-        text,
-        reply_markup=trust_menu()
-    )
-
+await message.answer_photo(
+    photo=FSInputFile("main_menu.jpg"),
+    caption=text,
+    reply_markup=main_menu()
+)
 def trust_menu():
 
     keyboard = InlineKeyboardMarkup(
@@ -1823,6 +1815,49 @@ async def reply_send(message: Message, state: FSMContext):
         "⚙️ Админ панель",
         reply_markup=admin_menu()
     )
+    
+@dp.callback_query(F.data == "policy")
+async def policy(call: CallbackQuery):
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu")]
+    ])
+
+    text = """🔒 AF Bot ~ Политика безопасности  
+
+━━━━━━ ⋆ ✦ ⋆ ━━━━━━  
+
+🔎 Почему нам можно доверять  
+🔒 Гарантии безопасности  
+🛒 Как проходит покупка  
+🌐 Наши официальные каналы  
+
+━━━━━━━━━━━━━━━━━━  
+
+📌 Перед покупкой рекомендуем ознакомиться  
+со всей информацией выше  
+
+Это поможет избежать ошибок  
+и понять как всё работает  
+
+━━━━━━━━━━━━━━━━━━  
+
+👇 Выберите нужный раздел ниже
+"""
+
+    try:
+        await call.message.edit_text(
+            text,
+            reply_markup=trust_menu()
+        )
+    except:
+        await call.message.delete()
+        await call.message.answer(
+            text,
+            reply_markup=trust_menu()
+        )
+
+    await call.answer()
 # ============================================================
 # DONE ORDERS
 # ============================================================
@@ -2008,6 +2043,8 @@ async def close_support(call: CallbackQuery):
         pass
 
     await call.answer()
+@dp.callback_query(F.data == "policy")
+async def policy(call: CallbackQuery):
     
 @dp.callback_query(F.data=="none")
 async def none(call: CallbackQuery):
