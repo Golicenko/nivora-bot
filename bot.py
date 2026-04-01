@@ -849,32 +849,35 @@ def trust_menu():
 # BACK
 # ============================================================
 
-text = """AF Bot ~ Главное меню  
+@dp.callback_query(F.data == "back")
+async def back(call: CallbackQuery):
+
+    text = """AF Bot ~  Главное меню  
 
 💎 Премиум подход к каждому аккаунту  
-⚡ Всё делается аккуратно и с опытом  
-🎓 Обучение с реальной практикой  
+⚡ Каждая услуга выполняется профессионально и с учётом деталей  
+🎓 Профессиональное обучение с опытом более 3 лет  
 
 ━━━━━━ ⋆ ✦ ⋆ ━━━━━━
 
-⚡ Более 15 услуг  
-📦 Наборы прокачки  
-🎓 Обучение GameGuardian  
-🛒 Готовые аккаунты  
-💬 Поддержка 24/7   
+⚡ Более 15 услуг — быстро и выгодно  
+📦 Наборы для прокачки аккаунта [Car Parking 1]  
+🎓 Обучение GameGuardian — с нуля ⇒ до навыков уверенного использования  
+🛒 Продажа готовых аккаунтов CP1/CP2  
+💬 Поддержка 24/7 — всегда ответим ~ поможем  
 
-👇 Выбери раздел
+👇 Выбери нужный раздел <3
 """
 
-await call.message.edit_media(
-    media=InputMediaPhoto(
-        media=FSInputFile("main_menu.jpg"),
-        caption=text
-    ),
-    reply_markup=main_menu()
-)
+    await call.message.edit_media(
+        media=InputMediaPhoto(
+            media=FSInputFile("main_menu.jpg"),
+            caption=text
+        ),
+        reply_markup=main_menu()
+    )
 
-await call.answer()
+    await call.answer()
 
 # ============================================================
 # ANALYTICS TODAY
