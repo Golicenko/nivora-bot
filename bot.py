@@ -1023,13 +1023,18 @@ async def acc_cp1(call: CallbackQuery):
     cursor.execute("SELECT COUNT(*) FROM accounts WHERE game='cp1'")
     count = cursor.fetchone()[0]
 
-    if count == 0:
-        kb = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="⬅ Назад", callback_data="accounts_menu")]
-        ])
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💳 Купить (47⭐)", callback_data="buy_acc_cp1")],
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="accounts_menu")]
+    ])
 
-        await call.message.edit_text(
-            "❗ Нет аккаунтов в наличии",
+    # если нет аккаунтов
+    if count == 0:
+        await call.message.edit_media(
+            media=InputMediaPhoto(
+                media=FSInputFile("accounts.jpg"),
+                caption="❗ Нет аккаунтов в наличии"
+            ),
             reply_markup=kb
         )
         return
@@ -1038,15 +1043,12 @@ async def acc_cp1(call: CallbackQuery):
 
 🚗 Аккаунт Car Parking 1 (автовыдача)
 
-Что входит:
-
 💰 50.000.000 виртов  
 🪙 30.000 коинов  
 🚗 187 машин  
 🏎 Открыт W16  
 🏠 Дом 3  
-👑 Ранг King  
-
+👑 Ранг King 
 👕 Вся одежда  
 🎭 Все анимации  
 🎟 Все стикеры  
@@ -1054,13 +1056,13 @@ async def acc_cp1(call: CallbackQuery):
 ⭐ Цена: 47⭐
 """
 
-    kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="💳 Купить (47⭐)", callback_data="buy_acc_cp1")],
-        [InlineKeyboardButton(text="⬅ Назад", callback_data="accounts_menu")]
-    ])
-
-    await call.message.edit_text(text, reply_markup=kb)
-
+    await call.message.edit_media(
+        media=InputMediaPhoto(
+            media=FSInputFile("accounts.jpg"),
+            caption=text
+        ),
+        reply_markup=kb
+    )
 
 # ============================================================
 # 🛒 АККАУНТЫ — CAR PARKING 2
@@ -1156,7 +1158,7 @@ async def support(call: CallbackQuery, state: FSMContext):
 
     await call.message.edit_media(
         media=InputMediaPhoto(
-            media=FSInputFile("accounts.jpg"),
+            media=FSInputFile("support.jpg"),
             caption=text
         ),
         reply_markup=kb
