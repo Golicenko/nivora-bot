@@ -846,13 +846,14 @@ def trust_menu():
     return keyboard
     
 # ============================================================
-# BACK
+# BACK (возврат в главное меню)
 # ============================================================
 
 @dp.callback_query(F.data == "back")
 async def back(call: CallbackQuery):
 
-text = """AF Bot ~ Главное меню  
+    # текст главного меню
+    text = """AF Bot ~ Главное меню  
 
 💎 Прокачка аккаунтов и услуги GameGuardian  
 ⚡ Быстро, безопасно и с опытом  
@@ -868,14 +869,16 @@ text = """AF Bot ~ Главное меню
 👇 Выбери раздел
 """
 
+    # редактируем сообщение (меняем фото + текст)
     await call.message.edit_media(
         media=InputMediaPhoto(
-            media=FSInputFile("main_menu.jpg"),
+            media=FSInputFile("main_menu.jpg"),  # картинка главного меню
             caption=text
         ),
-        reply_markup=main_menu()
+        reply_markup=main_menu()  # кнопки меню
     )
 
+    # убираем "часики" у кнопки
     await call.answer()
 
 # ============================================================
@@ -925,33 +928,32 @@ f"""📊 Аналитика
     )
 
 # ============================================================
-# CAR PARKING 2
+# 🚙 CAR PARKING 2 (основное меню)
 # ============================================================
 
 @dp.callback_query(F.data == "cp2")
 async def cp2_menu(call: CallbackQuery):
 
+    # кнопки
     kb = InlineKeyboardMarkup(inline_keyboard=[
-
         [InlineKeyboardButton(text="🎁 Наборы", callback_data="cp2_sets")],
-
         [InlineKeyboardButton(text="⚙️ Услуги", callback_data="cp2_services")],
-
         [InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu")]
-
     ])
 
+    # текст
     text = """🚙 AF Bot ~ Car Parking 2  
 
 💎 Услуги для прокачки аккаунта  
 
 📦 Наборы — скоро будут доступны  
 
-⚙️ Услуги — доступна базовая прокачка  
+⚙️ Доступна базовая прокачка  
 
 👇 Выберите раздел
 """
 
+    # отправка фото + текста
     await call.message.edit_media(
         media=InputMediaPhoto(
             media=FSInputFile("cp2.jpg"),
@@ -960,6 +962,11 @@ async def cp2_menu(call: CallbackQuery):
         reply_markup=kb
     )
 
+
+# ============================================================
+# 🎁 CP2 — НАБОРЫ
+# ============================================================
+
 @dp.callback_query(F.data == "cp2_sets")
 async def cp2_sets(call: CallbackQuery):
 
@@ -967,27 +974,32 @@ async def cp2_sets(call: CallbackQuery):
         [InlineKeyboardButton(text="⬅ Назад", callback_data="cp2")]
     ])
 
-    await call.message.edit_text(
-        "❗ Наборы пока недоступны",
+    await call.message.edit_media(
+        media=InputMediaPhoto(
+            media=FSInputFile("cp2.jpg"),
+            caption="❗ Наборы пока недоступны"
+        ),
         reply_markup=kb
     )
+
+
+# ============================================================
+# ⚙️ CP2 — УСЛУГИ
+# ============================================================
 
 @dp.callback_query(F.data == "cp2_services")
 async def cp2_services(call: CallbackQuery):
 
     kb = InlineKeyboardMarkup(inline_keyboard=[
-
         [InlineKeyboardButton(text="💰 50.000.000 виртов — 20⭐", callback_data="buy_cp2")],
-
         [InlineKeyboardButton(text="⬅ Назад", callback_data="cp2")]
-
     ])
 
     text = """⚙️ Услуги Car Parking 2  
 
-💰 Доступно: накрутка 50.000.000 виртов  
+💰 Накрутка 50.000.000 виртов  
 
-⚡ Выполняется быстро и безопасно  
+⚡ Быстро и безопасно  
 
 👇 Нажмите для покупки
 """
@@ -999,6 +1011,12 @@ async def cp2_services(call: CallbackQuery):
         ),
         reply_markup=kb
     )
+
+
+# ============================================================
+# 🛒 АККАУНТЫ — CAR PARKING 1
+# ============================================================
+
 @dp.callback_query(F.data == "acc_cp1")
 async def acc_cp1(call: CallbackQuery):
 
@@ -1016,32 +1034,37 @@ async def acc_cp1(call: CallbackQuery):
         )
         return
 
-    text = f"""в наличей {count}
+    text = f"""📦 В наличии: {count}
 
-Аккаунт в Car Parking
-(Автовыдача)
+🚗 Аккаунт Car Parking 1 (автовыдача)
 
-В аккаунт входит:
+Что входит:
 
-✅ 50.000.000 виртов
-✅ 30.000 коинов
-✅ 187 машин
-✅ открыт W16
-✅ открыт дом 3
-✅ ранг King
-✅ куплена вся одежда
-✅ куплены все анимации
-✅ куплены все стикеры
+💰 50.000.000 виртов  
+🪙 30.000 коинов  
+🚗 187 машин  
+🏎 Открыт W16  
+🏠 Дом 3  
+👑 Ранг King  
 
-Цена: 47⭐️
+👕 Вся одежда  
+🎭 Все анимации  
+🎟 Все стикеры  
+
+⭐ Цена: 47⭐
 """
 
     kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="💳 Купить (47 ⭐)", callback_data="buy_acc_cp1")],
+        [InlineKeyboardButton(text="💳 Купить (47⭐)", callback_data="buy_acc_cp1")],
         [InlineKeyboardButton(text="⬅ Назад", callback_data="accounts_menu")]
     ])
 
     await call.message.edit_text(text, reply_markup=kb)
+
+
+# ============================================================
+# 🛒 АККАУНТЫ — CAR PARKING 2
+# ============================================================
 
 @dp.callback_query(F.data == "acc_cp2")
 async def acc_cp2(call: CallbackQuery):
@@ -1051,7 +1074,7 @@ async def acc_cp2(call: CallbackQuery):
     ])
 
     await call.message.edit_text(
-        "❗ Нет аккаунтов в наличии",
+        "❗ Аккаунты Car Parking 2 пока отсутствуют",
         reply_markup=kb
     )
 # ============================================================
