@@ -2057,12 +2057,16 @@ async def close_support(call: CallbackQuery):
 
 async def main():
     print("BOT STARTED")
+
+    # УБИРАЕМ WEBHOOK (фикс ошибки TelegramConflictError)
+    await bot.delete_webhook(drop_pending_updates=True)
+
+    # ЗАПУСК БОТА
     await dp.start_polling(bot)
 
-
 if __name__ == "__main__":
+    import asyncio
     asyncio.run(main())
-
 
 
 
