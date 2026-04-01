@@ -974,10 +974,19 @@ async def cp2_sets(call: CallbackQuery):
         [InlineKeyboardButton(text="⬅ Назад", callback_data="cp2")]
     ])
 
-    await call.message.edit_text(
+    # удаляем сообщение с фото
+    try:
+        await call.message.delete()
+    except:
+        pass
+
+    # отправляем новое без фото
+    await call.message.answer(
         "❗ Наборы пока недоступны",
         reply_markup=kb
     )
+
+    await call.answer()
 
 # ============================================================
 # ⚙️ CP2 — УСЛУГИ
@@ -991,10 +1000,19 @@ async def cp2_services(call: CallbackQuery):
         [InlineKeyboardButton(text="⬅ Назад", callback_data="cp2")]
     ])
 
-    await call.message.edit_text(
-        "⚙️ Услуги Car Parking 2\n\n💰 50.000.000 виртов",
+    # удаляем сообщение с фото
+    try:
+        await call.message.delete()
+    except:
+        pass
+
+    # отправляем новое сообщение
+    await call.message.answer(
+        "⚙️ Услуги Car Parking 2\n\n💰 Доступно: 50.000.000 виртов\n⭐ Цена: 20 Stars",
         reply_markup=kb
     )
+
+    await call.answer()
 
 # ============================================================
 # 🛒 АККАУНТЫ — CAR PARKING 1
