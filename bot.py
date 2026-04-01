@@ -1786,62 +1786,69 @@ async def policy(call: CallbackQuery):
 
     kb = InlineKeyboardMarkup(inline_keyboard=[
 
-    [InlineKeyboardButton(
-        text="📱 Android 5–14",
-        web_app=WebAppInfo(url="https://golicenko.github.io/nivora-bot/android5-14-guide.html")
-    )],
+        [
+            InlineKeyboardButton(
+                text="🔎 Почему нам можно доверять",
+                web_app=WebAppInfo(
+                    url="https://golicenko.github.io/nivora-bot/trust.html"
+                )
+            )
+        ],
 
-    [InlineKeyboardButton(
-        text="📱 Android 15–16",
-        web_app=WebAppInfo(url="https://golicenko.github.io/nivora-bot/guide-android-15-16.html")
-    )],
+        [
+            InlineKeyboardButton(
+                text="🔒 Гарантии безопасности",
+                web_app=WebAppInfo(
+                    url="https://golicenko.github.io/nivora-bot/security.html"
+                )
+            )
+        ],
 
-    [InlineKeyboardButton(
-        text="🔒 Гарантии / Инфо",
-        web_app=WebAppInfo(url="ССЫЛКА_3_ВСТАВЬ")
-    )],
+        [
+            InlineKeyboardButton(
+                text="🛒 Как проходит покупка",
+                web_app=WebAppInfo(
+                    url="https://golicenko.github.io/nivora-bot/purchase.html"
+                )
+            )
+        ],
 
-    [InlineKeyboardButton(
-        text="📖 Как проходит покупка",
-        web_app=WebAppInfo(url="ССЫЛКА_4_ВСТАВЬ")
-    )],
+        [
+            InlineKeyboardButton(
+                text="🌐 Наши официальные каналы",
+                web_app=WebAppInfo(
+                    url="https://golicenko.github.io/nivora-bot/channels.html"
+                )
+            )
+        ],
 
-    [InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu")]
+        [
+            InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu")
+        ]
 
-])
+    ])
 
-    text = """🔒 AF Bot ~ Политика безопасности  
+    text = f"""Здравствуй, {name}! 👋
 
-━━━━━━ ⋆ ✦ ⋆ ━━━━━━  
+Если ты совершаешь покупку первый раз в нашем боте,
+рекомендуем ознакомиться с информацией ниже.
+
+Мы подготовили несколько страниц с важной информацией:
 
 🔎 Почему нам можно доверять  
 🔒 Гарантии безопасности  
 🛒 Как проходит покупка  
 🌐 Наши официальные каналы  
 
-━━━━━━━━━━━━━━━━━━  
-
-📌 Перед покупкой ознакомьтесь с информацией  
-Это поможет избежать ошибок  
-
-━━━━━━━━━━━━━━━━━━  
+После ознакомления нажми кнопку ниже 👇
 """
-
-    try:
-        await call.message.edit_media(
-            media=InputMediaPhoto(
-                media=FSInputFile("main_menu.jpg"),
-                caption=text
-            ),
-            reply_markup=kb
-        )
-    except:
-        await call.message.delete()
-        await call.message.answer_photo(
-            photo=FSInputFile("main_menu.jpg"),
-            caption=text,
-            reply_markup=kb
-        )
+    await call.message.edit_media(
+        media=InputMediaPhoto(
+            media=FSInputFile("main_menu.jpg"),
+            caption=text
+        ),
+        reply_markup=kb
+    )
 
     await call.answer()
 # ============================================================
