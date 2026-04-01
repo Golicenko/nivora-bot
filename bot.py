@@ -36,8 +36,9 @@ dp = Dispatcher(storage=MemoryStorage())
 
 import psycopg2
 
-DATABASE_URL = "postgresql://nivora:bBOdPDTeQKYl5kpfdAiVtjIbP6l5iQA8@dpg-d75evkruibrs73c706m0-a/nivora_n0s1"
-db = psycopg2.connect(DATABASE_URL)
+DATABASE_URL = "postgresql://nivora:bBOdPDTeQKYl5kpfdAiVtjIbP6l5iQA8@dpg-d75evkruibrs73c706m0-a.oregon-postgres.render.com:5432/nivora_n0s1"
+
+db = psycopg2.connect(DATABASE_URL, sslmode="require")
 cursor = db.cursor()
 
 # =========================
