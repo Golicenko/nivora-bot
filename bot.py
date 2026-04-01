@@ -369,7 +369,7 @@ async def accounts_menu(call: CallbackQuery):
         [InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu")]
     ])
 
-   text = """🛒 Аккаунты  
+    text = """🛒 Аккаунты  
 
 ✨ Здесь вы можете купить готовый аккаунт  
 для Car Parking 1 / 2  
@@ -384,13 +384,13 @@ async def accounts_menu(call: CallbackQuery):
 👇 Выберите нужный раздел
 """
 
-await call.message.edit_media(
-    media=InputMediaPhoto(
-        media=FSInputFile("images/accounts.jpg"),
-        caption=text
-    ),
-    reply_markup=kb
-)
+    await call.message.edit_media(
+        media=InputMediaPhoto(
+            media=FSInputFile("images/accounts.jpg"),
+            caption=text
+        ),
+        reply_markup=kb
+    )
 # =====================================================
 # GAMEGUARDIAN TRAINING START
 # =====================================================
