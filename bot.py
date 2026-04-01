@@ -354,7 +354,7 @@ async def cp_menu(call: CallbackQuery):
 
     await call.message.edit_media(
         media=InputMediaPhoto(
-            media=FSInputFile("images/car_parking.jpg"),
+            media=FSInputFile("car_parking.jpg")
             caption=text
         ),
         reply_markup=kb
@@ -386,7 +386,7 @@ async def accounts_menu(call: CallbackQuery):
 
     await call.message.edit_media(
         media=InputMediaPhoto(
-            media=FSInputFile("images/accounts.jpg"),
+            media=FSInputFile("support.jpg"),
             caption=text
         ),
         reply_markup=kb
@@ -1078,7 +1078,7 @@ async def support(call: CallbackQuery, state: FSMContext):
 
     await call.message.edit_media(
         media=InputMediaPhoto(
-            media=FSInputFile("images/support.jpg"),
+            media=FSInputFile("support.jpg"),
             caption=text
         ),
         reply_markup=kb
@@ -1319,7 +1319,7 @@ async def back_menu(call: CallbackQuery):
     try:
         await call.message.edit_media(
             media=InputMediaPhoto(
-                media=FSInputFile("images/main_menu.jpg"),
+                media=FSInputFile("main_menu.jpg"),
                 caption=text
             ),
             reply_markup=main_menu()
@@ -1328,7 +1328,7 @@ async def back_menu(call: CallbackQuery):
         # если вдруг сообщение не редактируется
         await call.message.delete()
         await call.message.answer_photo(
-            photo=FSInputFile("images/main_menu.jpg"),
+            photo=FSInputFile("main_menu.jpg"),
             caption=text,
             reply_markup=main_menu()
         )
