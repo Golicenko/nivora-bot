@@ -305,16 +305,24 @@ async def gg_next(call: CallbackQuery):
 def main_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
 
-        [InlineKeyboardButton(text="🚗 Услуги Car Parking 1", callback_data="cp_menu")],
-        [InlineKeyboardButton(text="🚙 Услуги Car Parking 2", callback_data="cp2")],
+        [
+            InlineKeyboardButton(text="🚗 CP1", callback_data="cp_menu"),
+            InlineKeyboardButton(text="🚙 CP2", callback_data="cp2")
+        ],
 
-        [InlineKeyboardButton(text="🎓 Обучение GameGuardian", callback_data="gg_training")],
-        [InlineKeyboardButton(text="🛒 Купить аккаунт", callback_data="accounts_menu")],
+        [
+            InlineKeyboardButton(text="🎓 Обучение", callback_data="gg_training"),
+            InlineKeyboardButton(text="🛒 Аккаунты", callback_data="accounts_menu")
+        ],
 
-        [InlineKeyboardButton(text="🔒 Политика безопасности", callback_data="policy")],
+        [
+            InlineKeyboardButton(text="🔒 Политика", callback_data="policy"),
+            InlineKeyboardButton(text="⭐ Отзывы", url="https://t.me/otzyvy_AutoFlow1")
+        ],
 
-        [InlineKeyboardButton(text="⭐ Отзывы", url="https://t.me/otzyvy_AutoFlow1")],
-        [InlineKeyboardButton(text="💬 Поддержка", callback_data="support")]
+        [
+            InlineKeyboardButton(text="💬 Поддержка", callback_data="support")
+        ]
     ])
  
         
@@ -1778,27 +1786,26 @@ async def policy(call: CallbackQuery):
 
 ━━━━━━━━━━━━━━━━━━  
 
-📌 Перед покупкой рекомендуем ознакомиться  
-со всей информацией выше  
-
+📌 Перед покупкой ознакомьтесь с информацией  
 Это поможет избежать ошибок  
-и понять как всё работает  
 
 ━━━━━━━━━━━━━━━━━━  
-
-👇 Выберите нужный раздел ниже
 """
 
     try:
-        await call.message.edit_text(
-            text,
-            reply_markup=trust_menu()
+        await call.message.edit_media(
+            media=InputMediaPhoto(
+                media=FSInputFile("main_menu.jpg"),
+                caption=text
+            ),
+            reply_markup=kb
         )
     except:
         await call.message.delete()
-        await call.message.answer(
-            text,
-            reply_markup=trust_menu()
+        await call.message.answer_photo(
+            photo=FSInputFile("main_menu.jpg"),
+            caption=text,
+            reply_markup=kb
         )
 
     await call.answer()
