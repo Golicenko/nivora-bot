@@ -849,18 +849,32 @@ def trust_menu():
 # BACK
 # ============================================================
 
-@dp.callback_query(F.data == "back")
-async def back(call: CallbackQuery):
+text = """AF Bot ~ Главное меню  
 
-    await call.message.edit_text(
-"""AF Bot — Главное меню
+💎 Премиум подход к каждому аккаунту  
+⚡ Всё делается аккуратно и с опытом  
+🎓 Обучение с реальной практикой  
 
-🚘 Прокачай свой аккаунт в игре Car Parking.
+━━━━━━ ⋆ ✦ ⋆ ━━━━━━
 
-Выбери услугу, наборы
-или задай свой вопрос ниже 👇""",
-        reply_markup=main_menu()
-    )
+⚡ Более 15 услуг  
+📦 Наборы прокачки  
+🎓 Обучение GameGuardian  
+🛒 Готовые аккаунты  
+💬 Поддержка 24/7   
+
+👇 Выбери раздел
+"""
+
+await call.message.edit_media(
+    media=InputMediaPhoto(
+        media=FSInputFile("main_menu.jpg"),
+        caption=text
+    ),
+    reply_markup=main_menu()
+)
+
+await call.answer()
 
     await call.answer()
 
@@ -1078,13 +1092,12 @@ async def support(call: CallbackQuery, state: FSMContext):
 
     await call.message.edit_media(
         media=InputMediaPhoto(
-            media=FSInputFile("support.jpg"),
+            media=FSInputFile("accounts.jpg"),
             caption=text
         ),
         reply_markup=kb
     )
 
-    await state.set_state(AskState.waiting_question)
     await state.set_state(AskState.waiting_question)
 @dp.message(AskState.waiting_question)
 async def receive_question(message: Message, state: FSMContext):
