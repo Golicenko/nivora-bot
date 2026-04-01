@@ -728,7 +728,7 @@ async def buy_cp2(call: CallbackQuery):
 
     cursor.execute("""
 INSERT INTO orders(user_id,username,name,text,type,price,status,date)
-VALUES(?,?,?,?,?,?,?,?)
+VALUES(%s,%s,%s,%s,%s,%s,%s,%s)
 """,(
 call.from_user.id,
 call.from_user.username,
@@ -740,7 +740,8 @@ service,
 datetime.now().strftime("%Y-%m-%d %H:%M")
 ))
 
-    order_id = cursor.lastrowid
+    cursor.execute("SELECT LASTVAL()")
+order_id = cursor.fetchone()[0]
     db.commit()
 
     await bot.send_invoice(
@@ -866,7 +867,7 @@ async def analytics(call: CallbackQuery):
     cursor.execute("""
     SELECT COUNT(DISTINCT user_id)
     FROM visits
-    WHERE date(date)=date('now')
+    WHERE date::date = CURRENT_DATE
     """)
     active_today = cursor.fetchone()[0]
 
@@ -875,7 +876,7 @@ async def analytics(call: CallbackQuery):
     SELECT COUNT(*)
     FROM orders
     WHERE status='new'
-    AND date(date)=date('now')
+    AND date::date = CURRENT_DATE
     """)
     orders_today = cursor.fetchone()[0]
 
@@ -1105,7 +1106,7 @@ async def buy_service(call:CallbackQuery):
 
     cursor.execute("""
 INSERT INTO orders(user_id,username,name,text,type,price,status,date)
-VALUES(?,?,?,?,?,?,?,?)
+VALUES(%s,%s,%s,%s,%s,%s,%s,%s)
 """,(
 call.from_user.id,
 call.from_user.username,
@@ -1247,7 +1248,7 @@ async def payment(message: Message):
 """
         )
 
-        cursor.execute("DELETE FROM accounts WHERE id=?", (acc[0],))
+        cursor.execute("DELETE FROM accounts WHERE id=%s", (acc[0],))
         db.commit()
 
         await bot.send_message(
@@ -1268,7 +1269,7 @@ async def payment(message: Message):
         return
 
     cursor.execute(
-        "SELECT * FROM orders WHERE id=?",
+        "SELECT * FROM orders WHERE id=%s",
         (order_id,)
     )
     order = cursor.fetchone()
@@ -1279,7 +1280,7 @@ async def payment(message: Message):
 
     # меняем статус заказа
     cursor.execute(
-        "UPDATE orders SET status='new' WHERE id=?",
+        "UPDATE orders SET status='new' WHERE id=%s",
         (order_id,)
     )
     db.commit()
@@ -1332,7 +1333,7 @@ async def take_order(call: CallbackQuery):
     order_id = int(call.data.split("_")[1])
 
     cursor.execute(
-        "UPDATE orders SET status='new' WHERE id=?",
+        "UPDATE orders SET status='new' WHERE id=%s",
         (order_id,)
     )
 
@@ -1541,7 +1542,7 @@ async def save_account(message: Message, state: FSMContext):
             raise Exception()
 
         cursor.execute(
-            "INSERT INTO accounts(login,password,game) VALUES(?,?,?)",
+            "INSERT INTO accounts(login,password,game) VALUES(%s,%s,%s)",
             (login, password, game)
         )
 
@@ -1650,7 +1651,7 @@ async def view_order(call: CallbackQuery):
 
     order_id = int(call.data.split("_")[1])
 
-    cursor.execute("SELECT * FROM orders WHERE id=?", (order_id,))
+    cursor.execute("SELECT * FROM orders WHERE id=%s", (order_id,))
     o = cursor.fetchone()
 
     if not o:
@@ -1726,7 +1727,7 @@ async def reply_send(message: Message, state: FSMContext):
     reply_msg_id = data.get("reply_msg")
 
     cursor.execute(
-        "SELECT user_id FROM orders WHERE id=?",
+        "SELECT user_id FROM orders WHERE id=%s",
         (order_id,)
     )
 
@@ -1757,7 +1758,7 @@ async def reply_send(message: Message, state: FSMContext):
 
     # меняем статус заказа
     cursor.execute(
-        "UPDATE orders SET status='done' WHERE id=?",
+        "UPDATE orders SET status='done' WHERE id=%s",
         (order_id,)
     )
     db.commit()
@@ -1872,7 +1873,7 @@ async def admin_done(call:CallbackQuery):
 
     # готовые заказы сегодня
     cursor.execute(
-        "SELECT COUNT(*) FROM orders WHERE status='done' AND date(date)=date('now')"
+        "SELECT COUNT(*) FROM orders WHERE status='done' AND date::date = CURRENT_DATE"
     )
     today_done = cursor.fetchone()[0]
 
@@ -1924,7 +1925,7 @@ def get_stats(days=None):
 
     if days:
         date=(datetime.now()-timedelta(days=days)).strftime("%Y-%m-%d %H:%M")
-        cursor.execute("SELECT COUNT(*), SUM(price) FROM orders WHERE date>=?",(date,))
+        cursor.execute("SELECT COUNT(*), SUM(price) FROM orders WHERE date>=%s",(date,))
     else:
         cursor.execute("SELECT COUNT(*), SUM(price) FROM orders")
 
