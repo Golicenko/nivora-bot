@@ -1781,74 +1781,71 @@ async def reply_send(message: Message, state: FSMContext):
         reply_markup=admin_menu()
     )
     
+# ============================================================
+# 🔒 ПОЛИТИКА БЕЗОПАСНОСТИ
+# ============================================================
+
 @dp.callback_query(F.data == "policy")
 async def policy(call: CallbackQuery):
 
+    name = call.from_user.first_name  # ✅ ВАЖНО: добавили имя
+
     kb = InlineKeyboardMarkup(inline_keyboard=[
 
-        [
-            InlineKeyboardButton(
-                text="🔎 Почему нам можно доверять",
-                web_app=WebAppInfo(
-                    url="https://golicenko.github.io/nivora-bot/trust.html"
-                )
-            )
-        ],
+        [InlineKeyboardButton(
+            text="🔎 Почему нам можно доверять",
+            web_app=WebAppInfo(url="https://golicenko.github.io/nivora-bot/trust.html")
+        )],
 
-        [
-            InlineKeyboardButton(
-                text="🔒 Гарантии безопасности",
-                web_app=WebAppInfo(
-                    url="https://golicenko.github.io/nivora-bot/security.html"
-                )
-            )
-        ],
+        [InlineKeyboardButton(
+            text="🔒 Гарантии безопасности",
+            web_app=WebAppInfo(url="https://golicenko.github.io/nivora-bot/security.html")
+        )],
 
-        [
-            InlineKeyboardButton(
-                text="🛒 Как проходит покупка",
-                web_app=WebAppInfo(
-                    url="https://golicenko.github.io/nivora-bot/purchase.html"
-                )
-            )
-        ],
+        [InlineKeyboardButton(
+            text="🛒 Как проходит покупка",
+            web_app=WebAppInfo(url="https://golicenko.github.io/nivora-bot/purchase.html")
+        )],
 
-        [
-            InlineKeyboardButton(
-                text="🌐 Наши официальные каналы",
-                web_app=WebAppInfo(
-                    url="https://golicenko.github.io/nivora-bot/channels.html"
-                )
-            )
-        ],
+        [InlineKeyboardButton(
+            text="🌐 Наши официальные каналы",
+            web_app=WebAppInfo(url="https://golicenko.github.io/nivora-bot/channels.html")
+        )],
 
-        [
-            InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu")
-        ]
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu")]
 
     ])
 
-    text = f"""Здравствуй, {name}! 👋
+    text = f"""🔒 AF Bot ~ Политика безопасности  
 
-Если ты совершаешь покупку первый раз в нашем боте,
-рекомендуем ознакомиться с информацией ниже.
+Здравствуй, {name}! 👋  
 
-Мы подготовили несколько страниц с важной информацией:
+Если ты совершаешь покупку первый раз —  
+обязательно ознакомься с информацией ниже:
 
 🔎 Почему нам можно доверять  
 🔒 Гарантии безопасности  
 🛒 Как проходит покупка  
 🌐 Наши официальные каналы  
 
-После ознакомления нажми кнопку ниже 👇
+👇 Нажми на нужный пункт
 """
-    await call.message.edit_media(
-        media=InputMediaPhoto(
-            media=FSInputFile("main_menu.jpg"),
-            caption=text
-        ),
-        reply_markup=kb
-    )
+
+    try:
+        await call.message.edit_media(
+            media=InputMediaPhoto(
+                media=FSInputFile("main_menu.jpg"),
+                caption=text
+            ),
+            reply_markup=kb
+        )
+    except:
+        await call.message.delete()
+        await call.message.answer_photo(
+            photo=FSInputFile("main_menu.jpg"),
+            caption=text,
+            reply_markup=kb
+        )
 
     await call.answer()
 # ============================================================
