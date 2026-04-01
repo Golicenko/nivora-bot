@@ -726,23 +726,28 @@ async def buy_cp2(call: CallbackQuery):
 
     service = "CP2 | Накрутка 50.000.000 монет"
 
-    cursor.execute("""
-INSERT INTO orders(user_id,username,name,text,type,price,status,date)
-VALUES(%s,%s,%s,%s,%s,%s,%s,%s)
-""",(
-call.from_user.id,
-call.from_user.username,
-call.from_user.first_name,
-service,
-"service",
-20,
-"waiting_payment",
-datetime.now().strftime("%Y-%m-%d %H:%M")
-))
+    cursor.execute(
+        """
+        INSERT INTO orders(user_id, username, name, text, type, price, status, date)
+        VALUES(%s,%s,%s,%s,%s,%s,%s,%s)
+        """,
+        (
+            call.from_user.id,
+            call.from_user.username,
+            call.from_user.first_name,
+            service,
+            "service",
+            20,
+            "waiting_payment",
+            datetime.now().strftime("%Y-%m-%d %H:%M")
+        )
+    )
 
-    cursor.execute("SELECT LASTVAL()")
-order_id = cursor.fetchone()[0]
     db.commit()
+
+    # получаем id заказа
+    cursor.execute("SELECT LASTVAL()")
+    order_id = cursor.fetchone()[0]
 
     await bot.send_invoice(
         chat_id=call.from_user.id,
@@ -754,6 +759,7 @@ order_id = cursor.fetchone()[0]
         prices=[LabeledPrice(label="50M монет", amount=20)]
     )
 
+    await call.answer()
 @dp.callback_query(F.data == "buy_acc_cp1")
 async def buy_acc_cp1(call: CallbackQuery):
 
