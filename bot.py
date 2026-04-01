@@ -306,10 +306,10 @@ def main_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
 
         [
-            InlineKeyboardButton(text="🚗 CP1", callback_data="cp_menu"),
-            InlineKeyboardButton(text="🚙 CP2", callback_data="cp2")
+           InlineKeyboardButton(text="🚗 Car Parking 1", callback_data="cp_menu"),
+           InlineKeyboardButton(text="🚙 Car Parking 2", callback_data="cp2")
         ],
-
+        
         [
             InlineKeyboardButton(text="🎓 Обучение", callback_data="gg_training"),
             InlineKeyboardButton(text="🛒 Аккаунты", callback_data="accounts_menu")
@@ -979,24 +979,32 @@ async def acc_cp1(call: CallbackQuery):
     cursor.execute("SELECT COUNT(*) FROM accounts WHERE game='cp1'")
     count = cursor.fetchone()[0]
 
-    kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="💳 Купить (47⭐)", callback_data="buy_acc_cp1")],
-        [InlineKeyboardButton(text="⬅ Назад", callback_data="accounts_menu")]
-    ])
-
-    # ❗ УДАЛЯЕМ СООБЩЕНИЕ С ФОТО
+    # ❗ удаляем старое сообщение (с фото)
     try:
         await call.message.delete()
     except:
         pass
 
+    # =========================
+    # ❌ ЕСЛИ НЕТ АККАУНТОВ
+    # =========================
     if count == 0:
+
+        kb = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="⬅ Назад", callback_data="accounts_menu")]
+        ])
+
         await call.message.answer(
             "❗ Нет аккаунтов в наличии",
             reply_markup=kb
         )
+
         await call.answer()
         return
+
+    # =========================
+    # ✅ ЕСЛИ АККАУНТЫ ЕСТЬ
+    # =========================
 
     text = f"""📦 В наличии: {count}
 
@@ -1007,13 +1015,18 @@ async def acc_cp1(call: CallbackQuery):
 🚗 187 машин  
 🏎 Открыт W16  
 🏠 Дом 3  
-👑 Ранг King 
+👑 Ранг King  
 👕 Вся одежда  
 🎭 Все анимации  
 🎟 Все стикеры  
 
 ⭐ Цена: 47⭐
 """
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💳 Купить (47⭐)", callback_data="buy_acc_cp1")],
+        [InlineKeyboardButton(text="⬅ Назад", callback_data="accounts_menu")]
+    ])
 
     await call.message.answer(text, reply_markup=kb)
 
@@ -1772,8 +1785,30 @@ async def reply_send(message: Message, state: FSMContext):
 async def policy(call: CallbackQuery):
 
     kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu")]
-    ])
+
+    [InlineKeyboardButton(
+        text="📱 Android 5–14",
+        web_app=WebAppInfo(url="https://golicenko.github.io/nivora-bot/android5-14-guide.html")
+    )],
+
+    [InlineKeyboardButton(
+        text="📱 Android 15–16",
+        web_app=WebAppInfo(url="https://golicenko.github.io/nivora-bot/guide-android-15-16.html")
+    )],
+
+    [InlineKeyboardButton(
+        text="🔒 Гарантии / Инфо",
+        web_app=WebAppInfo(url="ССЫЛКА_3_ВСТАВЬ")
+    )],
+
+    [InlineKeyboardButton(
+        text="📖 Как проходит покупка",
+        web_app=WebAppInfo(url="ССЫЛКА_4_ВСТАВЬ")
+    )],
+
+    [InlineKeyboardButton(text="⬅ Назад", callback_data="back_menu")]
+
+])
 
     text = """🔒 AF Bot ~ Политика безопасности  
 
