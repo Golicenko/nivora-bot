@@ -740,10 +740,6 @@ async def buy_acc_cp1(call: CallbackQuery):
         currency="XTR",
         prices=prices
     )
-# ============================================================
-# START
-# ============================================================
-
 @dp.message(Command("start"))
 async def start(message: Message):
 
@@ -764,7 +760,6 @@ async def start(message: Message):
         (user_id,)
     )
 
-    # записываем посещение
     cursor.execute(
         "INSERT INTO visits(user_id,date) VALUES(?,?)",
         (user_id, datetime.now().strftime("%Y-%m-%d"))
@@ -773,6 +768,7 @@ async def start(message: Message):
     conn.commit()
     conn.close()
 
+    # ✅ ТВОЙ ТЕКСТ — Я НЕ СОКРАЩАЛ
     text = """AF Bot ~ Главное меню  
 
 💎 Прокачка аккаунтов и услуги  
@@ -790,64 +786,12 @@ async def start(message: Message):
 👇 Выбери раздел
 """
 
-await message.answer_photo(
-    photo=FSInputFile("main_menu.jpg"),
-    caption=text,
-    reply_markup=main_menu()
-)
-def trust_menu():
-
-    keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[
-
-            [
-                InlineKeyboardButton(
-                    text="🔎 Почему нам можно доверять",
-                    web_app=WebAppInfo(
-                        url="https://golicenko.github.io/nivora-bot/trust.html"
-                    )
-                )
-            ],
-
-            [
-                InlineKeyboardButton(
-                    text="🔒 Гарантии безопасности",
-                    web_app=WebAppInfo(
-                        url="https://golicenko.github.io/nivora-bot/security.html"
-                    )
-                )
-            ],
-
-            [
-                InlineKeyboardButton(
-                    text="🛒 Как проходит покупка",
-                    web_app=WebAppInfo(
-                        url="https://golicenko.github.io/nivora-bot/purchase.html"
-                    )
-                )
-            ],
-
-            [
-                InlineKeyboardButton(
-                    text="🌐 Наши официальные каналы",
-                    web_app=WebAppInfo(
-                        url="https://golicenko.github.io/nivora-bot/channels.html"
-                    )
-                )
-            ],
-
-            [
-                InlineKeyboardButton(
-                    text="🚀 Перейти в меню бота",
-                    callback_data="back_menu"
-                )
-            ]
-
-        ]
+    # ✅ ВАЖНО: теперь внутри функции
+    await message.answer_photo(
+        photo=FSInputFile("main_menu.jpg"),
+        caption=text,
+        reply_markup=main_menu()
     )
-
-    return keyboard
-    
 # ============================================================
 # BACK (возврат в главное меню)
 # ============================================================
