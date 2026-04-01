@@ -1317,31 +1317,23 @@ async def back_menu(call: CallbackQuery):
 """
 
     try:
-        await call.message.edit_media(
-            media=InputMediaPhoto(
-                media=FSInputFile("images/main_menu.jpg"),
-                caption=text
-            ),
-            reply_markup=main_menu()
-        )
-    except:
-        await call.message.delete()
-        await call.message.answer_photo(
-            photo=FSInputFile("images/main_menu.jpg"),
-            caption=text,
-            reply_markup=main_menu()
-        )
+    await call.message.edit_media(
+        media=InputMediaPhoto(
+            media=FSInputFile("images/main_menu.jpg"),
+            caption=text
+        ),
+        reply_markup=main_menu()
+    )
+except:
+    # если вдруг сообщение не редактируется
+    await call.message.delete()
+    await call.message.answer_photo(
+        photo=FSInputFile("images/main_menu.jpg"),
+        caption=text,
+        reply_markup=main_menu()
+    )
 
-    await call.answer()
-    except:
-        # если вдруг сообщение не редактируется
-        await call.message.delete()
-        await call.message.answer(
-            text,
-            reply_markup=main_menu()
-        )
-
-    await call.answer()
+await call.answer()
     
 # ============================================================
 # ADMIN PANEL
