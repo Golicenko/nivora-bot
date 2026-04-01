@@ -974,14 +974,10 @@ async def cp2_sets(call: CallbackQuery):
         [InlineKeyboardButton(text="⬅ Назад", callback_data="cp2")]
     ])
 
-    await call.message.edit_media(
-        media=InputMediaPhoto(
-            media=FSInputFile("cp2.jpg"),
-            caption="❗ Наборы пока недоступны"
-        ),
+    await call.message.edit_text(
+        "❗ Наборы пока недоступны",
         reply_markup=kb
     )
-
 
 # ============================================================
 # ⚙️ CP2 — УСЛУГИ
@@ -995,23 +991,10 @@ async def cp2_services(call: CallbackQuery):
         [InlineKeyboardButton(text="⬅ Назад", callback_data="cp2")]
     ])
 
-    text = """⚙️ Услуги Car Parking 2  
-
-💰 Накрутка 50.000.000 виртов  
-
-⚡ Быстро и безопасно  
-
-👇 Нажмите для покупки
-"""
-
-    await call.message.edit_media(
-        media=InputMediaPhoto(
-            media=FSInputFile("cp2.jpg"),
-            caption=text
-        ),
+    await call.message.edit_text(
+        "⚙️ Услуги Car Parking 2\n\n💰 50.000.000 виртов",
         reply_markup=kb
     )
-
 
 # ============================================================
 # 🛒 АККАУНТЫ — CAR PARKING 1
@@ -1028,13 +1011,9 @@ async def acc_cp1(call: CallbackQuery):
         [InlineKeyboardButton(text="⬅ Назад", callback_data="accounts_menu")]
     ])
 
-    # если нет аккаунтов
     if count == 0:
-        await call.message.edit_media(
-            media=InputMediaPhoto(
-                media=FSInputFile("accounts.jpg"),
-                caption="❗ Нет аккаунтов в наличии"
-            ),
+        await call.message.edit_text(
+            "❗ Нет аккаунтов в наличии",
             reply_markup=kb
         )
         return
@@ -1056,14 +1035,7 @@ async def acc_cp1(call: CallbackQuery):
 ⭐ Цена: 47⭐
 """
 
-    await call.message.edit_media(
-        media=InputMediaPhoto(
-            media=FSInputFile("accounts.jpg"),
-            caption=text
-        ),
-        reply_markup=kb
-    )
-
+    await call.message.edit_text(text, reply_markup=kb)
 # ============================================================
 # 🛒 АККАУНТЫ — CAR PARKING 2
 # ============================================================
@@ -1075,8 +1047,11 @@ async def acc_cp2(call: CallbackQuery):
         [InlineKeyboardButton(text="⬅ Назад", callback_data="accounts_menu")]
     ])
 
-    await call.message.edit_text(
-        "❗ Аккаунты Car Parking 2 пока отсутствуют",
+    await call.message.edit_media(
+        media=InputMediaPhoto(
+            media=FSInputFile("accounts.jpg"),
+            caption="❗ Аккаунты Car Parking 2 пока отсутствуют"
+        ),
         reply_markup=kb
     )
 # ============================================================
@@ -1092,7 +1067,7 @@ async def services(call:CallbackQuery):
     for i,s in enumerate(SERVICES):
         buttons.append([InlineKeyboardButton(text=s,callback_data=f"service_{i}")])
 
-    buttons.append([InlineKeyboardButton(text="⬅ Назад",callback_data="back")])
+    buttons.append([InlineKeyboardButton(text="⬅ Назад",callback_data="cp_menu")])
 
     await call.message.edit_text(
         "🚘 Игровые услуги\nЦена любой услуги 10⭐",
