@@ -1065,7 +1065,7 @@ async def support(call: CallbackQuery, state: FSMContext):
         ]
     )
 
-  text = """💬 Поддержка  
+    text = """💬 Поддержка  
 
 Напишите ваше сообщение прямо в чат.  
 
@@ -1076,13 +1076,15 @@ async def support(call: CallbackQuery, state: FSMContext):
 оплата, зависания, ошибки бота, отсутствие аккаунтов и другие технические проблемы. <3 
 """
 
-await call.message.edit_media(
-    media=InputMediaPhoto(
-        media=FSInputFile("images/support.jpg"),
-        caption=text
-    ),
-    reply_markup=kb
-)
+    await call.message.edit_media(
+        media=InputMediaPhoto(
+            media=FSInputFile("images/support.jpg"),
+            caption=text
+        ),
+        reply_markup=kb
+    )
+
+    await state.set_state(AskState.waiting_question)
     await state.set_state(AskState.waiting_question)
 @dp.message(AskState.waiting_question)
 async def receive_question(message: Message, state: FSMContext):
