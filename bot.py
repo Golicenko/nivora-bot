@@ -354,7 +354,7 @@ async def cp_menu(call: CallbackQuery):
 
     await call.message.edit_media(
         media=InputMediaPhoto(
-            media=FSInputFile("car_parking.jpg")
+            media=FSInputFile("car_parking.jpg"),
             caption=text
         ),
         reply_markup=kb
