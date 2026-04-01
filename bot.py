@@ -2043,13 +2043,8 @@ async def close_support(call: CallbackQuery):
         pass
 
     await call.answer()
-@dp.callback_query(F.data == "policy")
-async def policy(call: CallbackQuery):
-    
-@dp.callback_query(F.data=="none")
-async def none(call: CallbackQuery):
-    await call.answer("Заказов нет")
-async def main():
+
+
     print("BOT STARTED")
     await dp.start_polling(bot)
 
